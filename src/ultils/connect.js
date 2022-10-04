@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 const config = {
   useUnifiedTopology: true,
@@ -15,4 +15,4 @@ const connectDatabase = async () => {
   }
 }
 
-export default connectDatabase;
+module.exports = { connectDatabase }
