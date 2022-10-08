@@ -36,13 +36,16 @@ const authController = {
       if (validPassword) {
         const token = jwt.sign({ userName, password: user.password }, process.env.JWT_SECRET_KEY)
         console.log(token);
-        res.status(200).json({ message: "Sign in sucess", token: token });
+        res.status(200).json({ message: "Sign in sucess", token: token, data: user });
       } else {
         res.status(400).json({ error: "Invalid Password" });
       }
     } else {
       res.status(401).json({ error: "User does not exist" });
     }
+  }),
+  logout: asyncHandler(async (req, res) => {
+
   }),
 }
 

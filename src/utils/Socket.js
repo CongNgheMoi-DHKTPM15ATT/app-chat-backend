@@ -52,12 +52,12 @@ io.on("connection", (socket) => {
   })
 
 
-  //when disconnect
-  // socket.on("disconnect", () => {
-  //   console.log("a user disconnected!");
-  //   removeUser(socket.id);
-  //   io.emit("getUsers", _userOnlines);
-  // });
+  // when disconnect
+  socket.on("disconnect", () => {
+    console.log("a user disconnected!");
+    removeUser(socket.id);
+    io.emit("getUsers", _userOnlines);
+  });
 });
 
 module.exports = socketApi;

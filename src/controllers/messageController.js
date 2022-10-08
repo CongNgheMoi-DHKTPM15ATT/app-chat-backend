@@ -2,27 +2,11 @@ const asyncHandler = require('express-async-handler');
 const Messages = require('./../models/Messages.js');
 
 const messageController = {
-  // getMessage: asyncHandler(async (req, res, next) => {
-  //   try {
-  //     const { from, to } = req.body;
-
-  //     const messages = await Messages.find({
-  //       users: {
-  //         $all: [from, to],
-  //       },
-  //     }).sort({ updatedAt: 1 });
-
-  //     const projectedMessages = messages.map((msg) => {
-  //       return {
-  //         fromSelf: msg.sender.toString() === from,
-  //         message: msg.message.text,
-  //       };
-  //     });
-  //     res.json(projectedMessages);
-  //   } catch (ex) {
-  //     next(ex);
-  //   }
-  // }),
+  getMessagesConversation: asyncHandler(async (req, res, next) => {
+    const { senderId, receiverId } = req.query;
+    const conversation = await Messages.find({ 'users': { '$in': [senderId, receiverId] } })
+    return res.json({ conversation })
+  }),
   getLastMessages: asyncHandler(async (req, res, next) => {
     const { senderId, receiverId } = req.query;
     const mess = await Messages.findOne({ 'users': { '$in': [senderId, receiverId] } }, {}, { sort: { 'createdAt': -1 } });
