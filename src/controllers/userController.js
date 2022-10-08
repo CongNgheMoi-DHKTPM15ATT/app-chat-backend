@@ -15,15 +15,25 @@ const userController = {
 
     userModified = user.save();
 
-
-    socket.id
-
     return res.status(200).json({ 'data': userModified })
 
   }),
   getAll: asyncHandler(async (req, res) => {
     const users = await User.find({})
     return res.status(200).json(users);
+  }),
+  getById: asyncHandler(async (req, res) => {
+    try {
+      const { _id } = req.query;
+      const user = await User.findOne({ _id })
+      if (user) {
+        return res.status(200).json({ user })
+      } else {
+        return res.status(404).json({ 'mess': 'not found user' })
+      }
+    } catch (err) {
+      console.log(err)
+    }
   })
 }
 

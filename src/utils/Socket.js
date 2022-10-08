@@ -1,8 +1,10 @@
 const { Server } = require('socket.io')
+require('dotenv').config();
 
 let io = new Server({
   cors: {
-    origin: 'http://localhost:3000',
+    origin: process.env.FRONTEND_URL,
+    credentials: true
   }
 })
 
