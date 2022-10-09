@@ -4,7 +4,6 @@ require('dotenv').config();
 let io = new Server({
   cors: {
     origin: process.env.FRONTEND_URL,
-    credentials: true
   }
 })
 
