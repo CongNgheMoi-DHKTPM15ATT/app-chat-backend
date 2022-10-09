@@ -20,7 +20,7 @@ const addUser = (userId, socketId) => {
 };
 
 const removeUser = (socketId) => {
-  // users = users.filter((user) => user.socketId !== socketId);
+  _userOnlines.delete(getByValue(_userOnlines, socketId));
 };
 
 const getUser = (userId) => {
