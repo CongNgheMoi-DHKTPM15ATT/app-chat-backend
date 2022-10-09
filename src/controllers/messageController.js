@@ -2,16 +2,16 @@ const asyncHandler = require('express-async-handler');
 const Messages = require('./../models/Messages.js');
 
 const messageController = {
-  getMessagesConversation: asyncHandler(async (req, res, next) => {
-    const { senderId, receiverId } = req.query;
-    const conversation = await Messages.find({ 'users': { '$in': [senderId, receiverId] } })
-    return res.json({ conversation })
-  }),
-  getLastMessages: asyncHandler(async (req, res, next) => {
-    const { senderId, receiverId } = req.query;
-    const mess = await Messages.findOne({ 'users': { '$in': [senderId, receiverId] } }, {}, { sort: { 'createdAt': -1 } });
-    return res.json({ 'data': mess })
-  }),
+  // getMessagesConversation: asyncHandler(async (req, res, next) => {
+  //   const { senderId, receiverId } = req.query;
+  //   const conversation = await Messages.find({ 'users': { '$in': [senderId, receiverId] } })
+  //   return res.json({ conversation })
+  // }),
+  // getLastMessages: asyncHandler(async (req, res, next) => {
+  //   const { senderId, receiverId } = req.query;
+  //   const mess = await Messages.findOne({ 'users': { '$in': [senderId, receiverId] } }, {}, { sort: { 'createdAt': -1 } });
+  //   return res.json({ 'data': mess })
+  // }),
   save: asyncHandler(async (req, res, next) => {
     try {
       console.log('start save msg')
