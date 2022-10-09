@@ -9,6 +9,7 @@ const socketApi = require('./utils/Socket')
 const authRoute = require('./routes/authRoute');
 const userRoute = require('./routes/userRoute');
 const messageRoute = require('./routes/messageRoute');
+const conversationRoute = require('./routes/conversationRoute');
 
 const verifyToken = require('./middlewares/auth');
 const cors = require('cors');
@@ -44,7 +45,7 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoute);
 app.use('/api/user', userRoute);
 app.use('/api/messages', messageRoute);
-app.use('/api/conversation', messageRoute);
+app.use('/api/conversation', conversationRoute);
 
 server.listen(process.env.PORT, () => {
   console.log(`Express running => PORT ${server.address().port}`);

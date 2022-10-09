@@ -5,4 +5,4 @@ const conversationRoute = express.Router();
 
 conversationRoute.get('/user', conversationController.getAllByUser);
 
-export default conversationRoute;
+module.exports = conversationRoute;
