@@ -1,10 +1,5 @@
 const { Schema, model } = require('mongoose');
 
-const Friends = new Schema({
-
-  lastMessage: { type: String, ref: 'Message' }
-}, { _id: false, autoIndex: false })
-
 const UserSchema = new Schema({
   _id: { type: Schema.Types.ObjectId, auto: true },
   user_name: { type: String, require: true },

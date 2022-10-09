@@ -7,10 +7,10 @@ const authController = {
   register: asyncHandler(async (req, res) => {
     try {
 
-      const { user_name, password } = req.body;
-      console.log(user_name);
+      const { user_name, password, email, phone } = req.body;
+      console.log(email);
       const passwordEncoded = await bcrypt.hash(password, await bcrypt.genSalt(10))
-      const createUser = new User({ user_name, 'password': passwordEncoded })
+      const createUser = new User({ user_name, email, phone, 'password': passwordEncoded, })
 
       const newUser = await createUser.save();
 
