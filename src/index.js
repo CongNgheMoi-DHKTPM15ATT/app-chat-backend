@@ -44,6 +44,7 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoute);
 app.use('/api/user', userRoute);
 app.use('/api/messages', messageRoute);
+app.use('/api/conversation', messageRoute);
 
 server.listen(process.env.PORT, () => {
   console.log(`Express running => PORT ${server.address().port}`);

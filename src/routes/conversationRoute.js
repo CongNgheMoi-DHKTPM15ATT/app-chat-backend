@@ -3,6 +3,6 @@ const conversationController = require('./../controllers/conversationController'
 
 const conversationRoute = express.Router();
 
-conversationRoute.get('/', conversationController.index);
+conversationRoute.get('/user', conversationController.getAllByUser);
 
 export default conversationRoute;

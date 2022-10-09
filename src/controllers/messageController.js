@@ -1,12 +1,15 @@
 const asyncHandler = require('express-async-handler');
 const Messages = require('./../models/Messages.js');
+const Conversation = require('./../models/Conversation.js');
+const User = require('./../models/User.js');
 
 const messageController = {
-  // getMessagesConversation: asyncHandler(async (req, res, next) => {
-  //   const { senderId, receiverId } = req.query;
-  //   const conversation = await Messages.find({ 'users': { '$in': [senderId, receiverId] } })
-  //   return res.json({ conversation })
-  // }),
+  getMessagesByConversation: asyncHandler(async (req, res, next) => {
+    const { conversation_id } = req.query;
+    console.log(conversation_id)
+    const messages = await Messages.find({ "conversation_id": { "$in": [conversation_id] } })
+    return res.json({ messages })
+  }),
   // getLastMessages: asyncHandler(async (req, res, next) => {
   //   const { senderId, receiverId } = req.query;
   //   const mess = await Messages.findOne({ 'users': { '$in': [senderId, receiverId] } }, {}, { sort: { 'createdAt': -1 } });
@@ -17,13 +20,33 @@ const messageController = {
       console.log('start save msg')
       const { senderId, receiverId, text } = req.body;
 
-      const data = await new Messages({
-        content: text,
+      const message = await new Messages({
         sender: senderId,
-        users: [senderId, receiverId],
+        content: text,
       }).save();
 
-      if (data) return res.status(200).json({ msg: 'Message added successfully.', 'data': data });
+      const userReceive = await User.find({ '_id': receiverId });
+
+      let conversation = await Conversation.findOne({ between: { "$in": [senderId, receiverId] } })
+      if (conversation) {
+        conversation.last_messages_id = message._id;
+        conversation.save()
+      } else {
+        console.log("test")
+        conversation = await new Conversation({
+          between: [senderId, receiverId],
+          chat_type: 'user',
+          last_messages_id: message._id,
+          nick_name: userReceive.user_name,
+        }).save();
+      }
+
+      console.log(conversation)
+
+      message.conversation_id = conversation._id
+      message.save();
+
+      if (message) return res.status(200).json({ msg: 'Message added successfully.', 'data': message });
       else return res.status(400).json({ msg: 'Failed to add message to the database' });
     } catch (ex) {
       next(ex);

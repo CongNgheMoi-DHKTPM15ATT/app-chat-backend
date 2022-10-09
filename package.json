@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon ./src/index.js",
     "start": "node ./src/index.js",
-    "seed": "node ./src/seeder/userSeeder.js",
+    "seed": "node ./src/seeder/dbSeeder.js",
     "heroku-prebuild": "export NPM_CONFIG_PRODUCTION=false; export NODE_ENV=; NPM_CONFIG_PRODUCTION=false NODE_ENV=development npm install --only=dev --dev",
     "heroku-postbuild": "export NPM_CONFIG_PRODUCTION=true; export NODE_ENV=production;",
     "build": "npm install --only=dev"
@@ -29,7 +29,8 @@
     "socket.io": "^4.5.2"
   },
   "devDependencies": {
-    "faker": "^6.6.6",
+    "@faker-js/faker": "^7.5.0",
+    "mongoose-query-random": "^1.0.1",
     "mongoose-seed": "^0.6.0",
     "nodemon": "^2.0.20"
   }
