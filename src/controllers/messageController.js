@@ -29,14 +29,14 @@ const messageController = {
 
       let conversation = await Conversation.findOne({ between: { "$in": [senderId, receiverId] } })
       if (conversation) {
-        conversation.last_messages_id = message._id;
+        conversation.last_messages = message._id;
         conversation.save()
       } else {
         console.log("test")
         conversation = await new Conversation({
           between: [senderId, receiverId],
           chat_type: 'user',
-          last_messages_id: message._id,
+          last_messages: message._id,
           nick_name: userReceive.user_name,
         }).save();
       }

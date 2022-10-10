@@ -8,7 +8,7 @@ const UserSchema = new Schema({
   phone: { type: String, unique: true },
   avatar: { type: String },
   birth_day: { type: Date, default: Date.now },
-  friends: { type: [{ user_id: { type: String, ref: 'User' }, pending: Boolean }], default: [] },
+  friends: { type: [{ user_id: { type: Schema.Types.ObjectId, ref: 'User' }, pending: Boolean }], default: [] },
   list_user_id_advices: { type: [{ type: String, }], default: [] },
   list_user_id_blocks: { type: [{ type: String, }], default: [] }
 
