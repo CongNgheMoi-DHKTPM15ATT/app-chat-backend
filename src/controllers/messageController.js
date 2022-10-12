@@ -18,33 +18,19 @@ const messageController = {
   save: asyncHandler(async (req, res, next) => {
     try {
       console.log('start save msg')
-      const { senderId, receiverId, text } = req.body;
+      const { sender_id, conversation_id, text } = req.body;
 
       const message = await new Messages({
-        sender: senderId,
+        sender: sender_id,
         content: text,
+        conversation: conversation_id,
       }).save();
 
-      const userReceive = await User.find({ '_id': receiverId });
+      const conversation = await Conversation.findOneAndUpdate({ conversation_id }, {
+        last_messages: message._id,
+      });
 
-      let conversation = await Conversation.findOne({ between: { "$in": [senderId, receiverId] } })
-      if (conversation) {
-        conversation.last_messages = message._id;
-        conversation.save()
-      } else {
-        console.log("test")
-        conversation = await new Conversation({
-          between: [senderId, receiverId],
-          chat_type: 'user',
-          last_messages: message._id,
-          nick_name: userReceive.user_name,
-        }).save();
-      }
-
-      console.log(conversation)
-
-      message.conversation_id = conversation._id
-      message.save();
+      console.log(conversation);
 
       if (message) return res.status(200).json({ msg: 'Message added successfully.', 'data': message });
       else return res.status(400).json({ msg: 'Failed to add message to the database' });

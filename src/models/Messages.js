@@ -7,7 +7,7 @@ const MessagesSchema = new Schema({
   content: { type: String, require: true },
   content_type: { type: String, require: true, default: 'text' },
   deleted: { type: Boolean, default: false },
-  conversations: [{ type: String, require: true, ref: "Conversation" }]
+  conversation: { type: Schema.Types.ObjectId, require: true, ref: "Conversation" }
 }, { timestamps: true })
 
 module.exports = model("Messages", MessagesSchema);
