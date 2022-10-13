@@ -47,7 +47,7 @@ app.use('/api/user', userRoute);
 app.use('/api/messages', messageRoute);
 app.use('/api/conversation', conversationRoute);
 
-server.listen(process.env.PORT || 3920, () => {
+server.listen(process.env.PORT || 6052, () => {
   console.log(`Express running => PORT ${server.address().port}`);
   connectDatabase();
 });

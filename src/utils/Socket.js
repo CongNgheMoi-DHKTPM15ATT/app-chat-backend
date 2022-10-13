@@ -36,6 +36,7 @@ io.on("connection", (socket) => {
 
   //take userId and socketId from user
   socket.on("addUser", (data) => {
+    console.log("haha")
     const { senderId } = data;
     addUser(senderId, socket.id);
     console.log(senderId)

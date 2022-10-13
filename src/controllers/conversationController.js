@@ -1,6 +1,6 @@
 const asyncHandler = require('express-async-handler');
 const Conversation = require('./../models/Conversation.js');
-const Messages = require('./../models/Messages.js');
+const Message = require('./../models/Message.js');
 const User = require('./../models/User.js')
 
 async function getUsers(user_ids) {
@@ -16,15 +16,14 @@ async function getUsers(user_ids) {
 const conversationController = {
   getAllByUser: asyncHandler(async (req, res, next) => {
     try {
-      const { user_id } = req.query;
+      const { user_id } = req.body;
 
-      const conversations = await Conversation.find({ between: user_id })
-      // console.log(conversations.last_messages_id);
-      // const last_messagse = await Messages.findOne({ _id: conversations.last_messages_id })
-      // for (i in conversations) {
-      //   console.log(conversations[i]);
-      // }
-      // conversations.last_messages = last_messagse;
+      console.log(user_id);
+
+      const conversations = await Conversation.find({ 'members.user_id': user_id }).populate({
+        path: "last_message"
+      })
+
       return res.status(200).json({ conversations });
     } catch (err) {
       console.log(err)
