@@ -3,7 +3,7 @@ const userController = require('./../controllers/userController');
 
 const userRoute = express.Router();
 
-// userRoute.post('/add-friend', userController.getLastMessages);
-userRoute.get('/list', userController.getAll);
+userRoute.post('/add-friend', userController.addFriend);
+// userRoute.post('/list', userController.getAll);
 
 module.exports = userRoute;

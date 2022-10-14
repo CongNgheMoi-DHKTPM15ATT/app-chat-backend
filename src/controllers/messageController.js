@@ -7,7 +7,7 @@ const messageController = {
   getMessageByConversation: asyncHandler(async (req, res, next) => {
     const { conversation_id } = req.query;
     console.log(conversation_id)
-    const message = await Message.find({ "conversation_id": { "$in": [conversation_id] } })
+    const message = await Message.find({ conversation: conversation_id })
     return res.json({ message })
   }),
   // getLastMessage: asyncHandler(async (req, res, next) => {

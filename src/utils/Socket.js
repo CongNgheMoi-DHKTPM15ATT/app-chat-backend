@@ -13,6 +13,13 @@ const socketApi = {
   io: io
 }
 
+function getByValue(map, value) {
+  for (let [key, value] of map.entries()) {
+    if (value === value)
+      return key;
+  }
+}
+
 global._userOnlines = new Map();
 
 const addUser = (userId, socketId) => {

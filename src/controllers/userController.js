@@ -4,17 +4,11 @@ const User = require('./../models/User.js');
 const userController = {
   addFriend: asyncHandler(async (req, res) => {
     const { user_id, friend_id } = req.body;
-
     console.log(friend_id);
-
     const user = await User.findOne({ '_id': user_id })
 
-    console.log(user)
-
-    user.list_friends = [{ 'user_id': friend_id, 'pending': false }]
-
+    user.list_friends = [...user.list_friends, { 'friends.user_id': friend_id, 'status': 'pending' }]
     userModified = user.save();
-
     return res.status(200).json({ 'data': userModified })
 
   }),

@@ -6,6 +6,6 @@ const messageRoute = express.Router();
 // /api/messages/send
 messageRoute.post('/send', messageController.save);
 // messageRoute.get('/lastMessages', messageController.getLastMessages);
-messageRoute.post('/conversation', messageController.getMessageByConversation);
+messageRoute.post('', messageController.getMessageByConversation);
 
 module.exports = messageRoute;
