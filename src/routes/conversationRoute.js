@@ -95,11 +95,12 @@ conversationRoute.post('', conversationController.getAllByUser);
  *        - in: body
  *          description: list user
  *          schema:
- *            type: array
- *            item:
- *              properties:
- *                user_id:
- *                  type: string
+ *            properties:
+ *              user_id:
+ *                type: array
+ *                items:
+ *                  item:
+ *                    type: string
  *      responses:
  *        200:
  *          description: OK
