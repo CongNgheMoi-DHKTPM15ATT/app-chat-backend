@@ -35,7 +35,6 @@ const conversationController = {
             console.log("private chat: " + conversations[i].members.length + " " + conversations[i]._id);
             conversations.splice(i, 1);
             i--;
-            console.log("check private chat: " + conversations[i].members.length + " " + conversations[i]._id);
           }
 
 
@@ -43,7 +42,6 @@ const conversationController = {
           console.log("group chat: " + conversations[i].members.length + " " + conversations[i]._id);
           conversations.splice(i, 1);
           i--;
-          console.log("check group chat: " + conversations[i].members.length + " " + conversations[i]._id);
 
         }
         // conversations[i].members = 'undefined';
