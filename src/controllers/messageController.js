@@ -7,21 +7,20 @@ const { ObjectId } = require('mongoose')
 const messageController = {
   getMessageByConversation: asyncHandler(async (req, res, next) => {
     const { conversation_id } = req.body;
-    const messages = await Message.find({}).populate('conversation').populate('sender')
+    const messages = await Message.find({ conversation: conversation_id }).populate({
+      path: 'conversation'
+    }).populate('sender')
 
-    // await messages.forEach((message) => {
-    //   console.log(message.conversation.members)
-    //   message.conversation.members.forEach((member) => {
-    //     for (i in message.conversation.members) {
-    //       console.log(object)
-    //     }
-    //     if (member.user_id === message.sender._id) {
-    //       console.log(member.user_id === message.sender._id)
-    //       console.log(member.nick_name)
-    //       messages.set('nick_name', member.nick_name)
-    //     }
-    //   })
-    // })
+    messages.forEach((message) => {
+      messages.conversation.members.forEach((member) => {
+        if (member.user_id === message.sender._id) {
+          console.log(member.user_id === message.sender._id)
+          console.log(member.nick_name)
+          messages.set('nick_name', member.nick_name)
+        }
+      })
+
+    })
 
 
     return res.json({ messages })
