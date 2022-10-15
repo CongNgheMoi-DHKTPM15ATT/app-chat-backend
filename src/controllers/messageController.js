@@ -11,16 +11,17 @@ const messageController = {
       path: 'conversation'
     }).populate('sender')
 
-    messages.forEach((message) => {
-      messages.conversation.members.forEach((member) => {
-        if (member.user_id === message.sender._id) {
-          console.log(member.user_id === message.sender._id)
-          console.log(member.nick_name)
-          messages.set('nick_name', member.nick_name)
-        }
-      })
-
-    })
+    // messages.forEach((message) => {
+    //   console.log(message.conversation.members)
+    //   message.conversation.members.forEach((member) => {
+    //     console.log("vao vong lap")
+    //     if (member.user_id === message.sender._id) {
+    //       console.log(member.user_id === message.sender._id)
+    //       console.log(member.nick_name)
+    //       messages.set('nick_name', member.nick_name)
+    //     }
+    //   })
+    // })
 
 
     return res.json({ messages })
