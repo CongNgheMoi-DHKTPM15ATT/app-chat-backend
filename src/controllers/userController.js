@@ -5,7 +5,7 @@ const userController = {
   addFriend: asyncHandler(async (req, res) => {
     const { user_id, friend_id } = req.body;
     console.log(friend_id);
-    const user = await User.findOne({ '_id': user_id })
+    const user = await User.findById({ '_id': user_id })
 
     user.list_friends = [...user.list_friends, { 'friends.user_id': friend_id, 'status': 'pending' }]
     userModified = user.save();
@@ -19,7 +19,7 @@ const userController = {
   getById: asyncHandler(async (req, res) => {
     try {
       const { _id } = req.query;
-      const user = await User.findOne({ _id })
+      const user = await User.findById({ _id })
       if (user) {
         return res.status(200).json({ user })
       } else {

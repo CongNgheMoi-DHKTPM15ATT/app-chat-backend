@@ -18,11 +18,17 @@ const conversationController = {
     try {
       const { user_id } = req.body;
 
-      console.log(user_id);
-
       const conversations = await Conversation.find({ 'members.user_id': user_id }).populate({
         path: "last_message"
-      })
+      }).sort({ 'updatedAt': 'desc' })
+
+      for (i in conversations) {
+        console.log(conversations[i].members.size === 2)
+        if (conversations[i].members.size === 2) {
+          await conversations[i].set({ receiver: user_id })
+        }
+        console.log(conversations[i].receiver)
+      }
 
       return res.status(200).json({ conversations });
     } catch (err) {
