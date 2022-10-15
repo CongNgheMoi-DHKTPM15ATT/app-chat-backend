@@ -22,25 +22,33 @@ const conversationController = {
         path: "last_message"
       }).sort({ 'updatedAt': 'desc' })
 
-      for (i in conversations) {
+      for (var i = 0; i < conversations.length; i++) {
         if (!conversations[i].is_room) {
           if (conversations[i].members.length === 2) {
-            console.log(conversations[i]._id);
+            console.log("user chat: " + conversations[i].members.length + " " + conversations[i]._id);
             let user_temp_id =
               conversations[i].members[0].user_id == user_id ?
               conversations[i].members[1].user_id : conversations[i].members[0].user_id
             conversations[i].set('receiver', await User.findById({ _id: user_temp_id }));
-          } else if (conversations[i].members.length === 1) {} {
-            console.log("private chat");
-            console.log(conversations[i].is_room)
-            await conversations.pop({ _id: conversations[i]._id })
+
+          } else if (conversations[i].members.length === 1) {
+            console.log("private chat: " + conversations[i].members.length + " " + conversations[i]._id);
+            conversations.splice(i, 1);
+            i--;
+            console.log("check private chat: " + conversations[i].members.length + " " + conversations[i]._id);
           }
+
+
         } else {
-          console.log("group chat");
-          console.log(conversations[i].is_room)
-          await conversations.pop(conversations[i])
+          console.log("group chat: " + conversations[i].members.length + " " + conversations[i]._id);
+          conversations.splice(i, 1);
+          i--;
+          console.log("check group chat: " + conversations[i].members.length + " " + conversations[i]._id);
+
         }
+        // conversations[i].members = 'undefined';
       }
+
       return res.status(200).json({ conversations });
     } catch (err) {
       console.log(err)
