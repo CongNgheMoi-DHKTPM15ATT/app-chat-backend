@@ -9,19 +9,20 @@ const messageController = {
     const { conversation_id } = req.body;
     const messages = await Message.find({}).populate('conversation').populate('sender')
 
-    for (i in messages) {
-      // console.log(messages[i].conversation.members)
-      let sender_id = messages[i].sender._id
-      console.log("sender: " + sender_id)
-      messages[i].conversation.members.forEach((e) => {
-        let user_id = e.user_id
-        console.log(user_id)
-        if (user_id === sender_id) {
-          messages.set('nick_name', e.nick_name)
-          return;
-        }
-      })
-    }
+    // await messages.forEach((message) => {
+    //   console.log(message.conversation.members)
+    //   message.conversation.members.forEach((member) => {
+    //     for (i in message.conversation.members) {
+    //       console.log(object)
+    //     }
+    //     if (member.user_id === message.sender._id) {
+    //       console.log(member.user_id === message.sender._id)
+    //       console.log(member.nick_name)
+    //       messages.set('nick_name', member.nick_name)
+    //     }
+    //   })
+    // })
+
 
     return res.json({ messages })
   }),
