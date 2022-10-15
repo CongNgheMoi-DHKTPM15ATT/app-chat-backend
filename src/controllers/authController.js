@@ -29,12 +29,22 @@ const authController = {
   }),
   login: asyncHandler(async (req, res) => {
     const { user_name, password } = req.body;
-    const user = await User.findOne({ user_name });
-    if (user) {
-      const validPassword = await bcrypt.compare(password, user.password);
+    const user_document = await User.findOne({ user_name });
+    if (user_document) {
+      const validPassword = await bcrypt.compare(password, user_document.password);
       if (validPassword) {
-        const token = jwt.sign({ user_name, password: user.password }, process.env.JWT_SECRET_KEY)
+        const token = jwt.sign({ user_name, password: user_document.password }, process.env.JWT_SECRET_KEY)
         console.log(token);
+
+        const user = {
+          "_id": user_document._id,
+          "user_name": user_document.user_name,
+          "birth_day": user_document.birth_day,
+          "friends": user_document.friends,
+          "phone": user_document.phone,
+          "createdAt": user_document.createdAt,
+          "updatedAt": user_document.updatedAt,
+        }
 
         res.status(200).json({ message: "Sign in sucess", token: token, data: user });
       } else {

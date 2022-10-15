@@ -7,24 +7,39 @@ const { ObjectId } = require('mongoose')
 const messageController = {
   getMessageByConversation: asyncHandler(async (req, res, next) => {
     const { conversation_id } = req.body;
-    const messages = await Message.find({ conversation: conversation_id }).populate({
+    const messages_document = await Message.find({ conversation: conversation_id }).populate({
       path: 'conversation'
     }).populate('sender')
 
-    // messages.forEach((message) => {
-    //   console.log(message.conversation.members)
-    //   message.conversation.members.forEach((member) => {
-    //     console.log("vao vong lap")
-    //     if (member.user_id === message.sender._id) {
-    //       console.log(member.user_id === message.sender._id)
-    //       console.log(member.nick_name)
-    //       messages.set('nick_name', member.nick_name)
-    //     }
-    //   })
-    // })
+    const messages = []
+    let sender;
+
+    messages_document.forEach((message) => {
+
+      message.conversation.members.forEach((member) => {
+        if (member.user_id.toString() === message.sender._id.toString()) {
+          sender = {
+            'user_id': member.user_id,
+            'nick_name': member.nick_name
+          }
+          return;
+        }
+      })
+      messages.push({
+        "_id": message._id,
+        "content": message.content,
+        "content_type": message.content_type,
+        "deleted": false,
+        "sender": sender,
+        "createdAt": message.createAt,
+        "updatedAt": message.updateAt,
+      })
+    })
 
 
-    return res.json({ messages })
+    return res.json({
+      messages
+    })
   }),
   // getLastMessage: asyncHandler(async (req, res, next) => {
   //   const { senderId, receiverId } = req.query;
@@ -48,8 +63,8 @@ const messageController = {
         last_message: message._id,
       });
 
-      if (message) return res.status(200).json({ msg: 'Message added successfully.', 'data': message });
-      else return res.status(400).json({ msg: 'Failed to add message to the database' });
+      if (message) return res.status(200).json({ message: 'Message added successfully.', 'data': message });
+      else return res.status(400).json({ message: 'Failed to add message to the database' });
     } catch (ex) {
       next(ex);
     }
