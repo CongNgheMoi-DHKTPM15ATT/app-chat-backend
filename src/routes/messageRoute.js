@@ -91,7 +91,7 @@ messageRoute.post('/send', messageController.save);
  *                "messages": [
  *                   {
  *                     "_id": "634a855271044545e3e54094",
- *                     "content": "th này láo giữ ta 12h trưa mai t đợi m ở cổng trường",
+ *                     "content": "hello bn",
  *                     "content_type": "text",
  *                     "deleted": false,
  *                     "sender": {
