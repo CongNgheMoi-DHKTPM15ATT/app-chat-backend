@@ -6,7 +6,7 @@ const { ObjectId } = require('mongoose')
 
 const messageController = {
   getMessageByConversation: asyncHandler(async (req, res, next) => {
-    const { conversation_id } = req.query;
+    const { conversation_id } = req.body;
     console.log(conversation_id)
     const messages = await Message.find({}).populate('conversation')
     return res.json({ messages })

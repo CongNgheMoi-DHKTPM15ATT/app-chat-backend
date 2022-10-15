@@ -18,18 +18,29 @@ const conversationController = {
     try {
       const { user_id } = req.body;
 
-      const conversations = await Conversation.find({ 'members.user_id': user_id }).populate({
+      const conversations = await Conversation.find({ 'members.user_id': user_id }, {}).populate({
         path: "last_message"
       }).sort({ 'updatedAt': 'desc' })
 
       for (i in conversations) {
-        console.log(conversations[i].members.size === 2)
-        if (conversations[i].members.size === 2) {
-          await conversations[i].set({ receiver: user_id })
+        if (!conversations[i].is_room) {
+          if (conversations[i].members.length === 2) {
+            console.log(conversations[i]._id);
+            let user_temp_id =
+              conversations[i].members[0].user_id == user_id ?
+              conversations[i].members[1].user_id : conversations[i].members[0].user_id
+            conversations[i].set('receiver', await User.findById({ _id: user_temp_id }));
+          } else if (conversations[i].members.length === 1) {} {
+            console.log("private chat");
+            console.log(conversations[i].is_room)
+            await conversations.pop({ _id: conversations[i]._id })
+          }
+        } else {
+          console.log("group chat");
+          console.log(conversations[i].is_room)
+          await conversations.pop(conversations[i])
         }
-        console.log(conversations[i].receiver)
       }
-
       return res.status(200).json({ conversations });
     } catch (err) {
       console.log(err)
