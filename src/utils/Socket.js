@@ -27,7 +27,7 @@ const addUser = (userId, socketId) => {
 };
 
 const removeUser = (socketId) => {
-  _userOnlines.delete(getByValue(_userOnlines, socketId));
+  // _userOnlines.delete(getByValue(_userOnlines, socketId));
 };
 
 const getUser = (userId) => {
