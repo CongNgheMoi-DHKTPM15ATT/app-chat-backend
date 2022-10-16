@@ -19,6 +19,7 @@ const conversationController = {
       const { user_id } = req.body;
       console.log("user id: " + user_id);
 
+
       const conversations_document = await Conversation.find({ "members.user_id": user_id }, {})
         .populate({
           path: "last_message",
@@ -34,6 +35,7 @@ const conversationController = {
           if (conversation.members.length === 2) {
             console.log(
               "user chat: " +
+
               conversation.members.length +
               " " +
               conversation._id
@@ -46,6 +48,7 @@ const conversationController = {
               conversation.members[0].user_id._id == user_id ?
               conversation.members[0].nick_name :
               conversation.members[1].nick_name;
+
             // var user = await User.findById({ _id: receiver_document._id })
             // receiver = {
             //   ...receiver_document,
@@ -62,7 +65,9 @@ const conversationController = {
                 receiver: {
                   _id: receiver_document.user_id._id,
                   nick_name: receiver_document.nick_name,
+
                   avatar: receiver_document.user_id.avatar ||
+
                     "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/2048px-User-avatar.svg.png",
                 },
                 last_message: {
@@ -79,6 +84,7 @@ const conversationController = {
           } else if (conversation.members.length === 1) {
             console.log(
               "private chat: " +
+
               conversation.members.length +
               " " +
               conversation._id
@@ -89,9 +95,11 @@ const conversationController = {
         } else {
           console.log(
             "group chat: " +
+
             conversation.members.length +
             " " +
             conversation._id
+
           );
           // conversations_document.splice(i, 1);
           // i--;
