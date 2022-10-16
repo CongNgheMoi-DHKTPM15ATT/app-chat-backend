@@ -44,6 +44,8 @@ const userRoute = express.Router();
  */
 
 userRoute.post('/add-friend', userController.addFriend);
+
+userRoute.post('/search', userController.searchUser);
 // userRoute.post('/list', userController.getAll);
 
 module.exports = userRoute;

@@ -55,7 +55,7 @@ const messageRoute = express.Router();
  *                _id: 634aea7c86f4e8e2702ce47c
  *                sender: 634255ff21fbe65180fa2f07
  *                content: hello bn
- *                content_type: text
+ *                content_type: text | file | image | link
  *                deleted: false
  *                conversation: 634a847f71044545e3e5408d
  *                createdAt: 2022-10-15T17:14:36.942Z

@@ -2,6 +2,8 @@ const asyncHandler = require('express-async-handler');
 const User = require('./../models/User.js');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const UserResponse = require('./../responses/userResponse');
+
 
 const authController = {
   register: asyncHandler(async (req, res) => {
@@ -36,17 +38,8 @@ const authController = {
         const token = jwt.sign({ user_name, password: user_document.password }, process.env.JWT_SECRET_KEY)
         console.log(token);
 
-        const user = {
-          "_id": user_document._id,
-          "user_name": user_document.user_name,
-          "birth_day": user_document.birth_day,
-          "friends": user_document.friends,
-          "phone": user_document.phone,
-          "createdAt": user_document.createdAt,
-          "updatedAt": user_document.updatedAt,
-        }
 
-        res.status(200).json({ message: "Sign in sucess", token: token, data: user });
+        res.status(200).json({ message: "Sign in sucess", token: token, data: new UserResponse(user_document).custom() });
       } else {
         res.status(400).json({ error: "Invalid Password" });
       }
