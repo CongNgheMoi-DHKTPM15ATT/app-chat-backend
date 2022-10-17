@@ -79,7 +79,7 @@ authRoute.post('/register', authController.register);
  *                password: $2b$10$kxMXixPLRUHUDK76jbj.ButBCOs.beZINQWO.OO19TFLOF5Rek6Sm
  *                email: omnibus@gmail.com
  *                birth_day: 2022-10-09T05:02:55.735+00:00
- *                friends: [{user_id: ObjectId('634269dc94c619b6b3671246'), status: pending | friended | block}, {user_id: ObjectId('634283e662e59562ae46d1f3'), status: pending | friended | block}]
+ *                friends: [{user_id: ObjectId('634269dc94c619b6b3671246'), status: pending | friended | block | accepting}, {user_id: ObjectId('634283e662e59562ae46d1f3'), status: pending | friended | block | accepting}]
  */
 authRoute.post('/login', authController.login);
 

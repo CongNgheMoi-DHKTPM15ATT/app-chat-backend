@@ -57,10 +57,16 @@ io.on("connection", (socket) => {
     console.log(socketId)
     socket.to(socketId).emit("getMessage", {
       senderId,
-      text,
     });
   })
 
+  socket.on('sendFriendRequest', (data) => {
+    const { senderId, receiverId } = data;
+    const socketId = _userOnlines.get(receiverId);
+    socket.to(socketId).emit("getFriendRequest", {
+
+    });
+  })
 
   // when disconnect
   socket.on("disconnect", () => {
