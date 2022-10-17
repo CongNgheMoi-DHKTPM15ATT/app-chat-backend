@@ -20,12 +20,17 @@ async function addFriend(user_id, receiver_id, status) {
 }
 
 async function getReceiverInfo(sender_id, receiver) {
-  const conversation = await Conversation.findOne({ members: { $size: 2 }, 'members.user_id': { $all: [mongoose.Types.ObjectId(sender_id), mongoose.Types.ObjectId(receiver._id)] } }, { members: { $elemMatch: { user_id: mongoose.Types.ObjectId(receiver._id) } } })
-  return {
-    ...new UserResponse(receiver).custom(),
-    nick_name: conversation ? conversation.members[0].nick_name : receiver.user_name,
-    conversation: conversation ? conversation._id : null,
+  if (receiver) {
+    const conversation = await Conversation.findOne({ members: { $size: 2 }, 'members.user_id': { $all: [mongoose.Types.ObjectId(sender_id), mongoose.Types.ObjectId(receiver._id)] } }, { members: { $elemMatch: { user_id: mongoose.Types.ObjectId(receiver._id) } } })
+    return {
+      ...new UserResponse(receiver).custom(),
+      nick_name: conversation ? conversation.members[0].nick_name : receiver.user_name,
+      conversation: conversation ? conversation._id : null,
+    }
+  } else {
+    return null;
   }
+
 }
 
 async function updateFriend(user_id, receiver_id, status) {
@@ -51,7 +56,8 @@ const userController = {
       const user_document = filter.match(phoneValid) ? await User.findOne({ phone: filter }) : await User.find({ _id: { $ne: mongoose.Types.ObjectId(user_id) }, user_name: { $regex: '.*' + filter + '.*' } });
 
       if (!user_document.length) {
-        if (user_document[0]) {
+        console.log(user_document)
+        if (user_document._id) {
           users.push(await getReceiverInfo(user_id, user_document))
         } else {
           return res.json(users)
