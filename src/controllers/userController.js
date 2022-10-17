@@ -50,10 +50,8 @@ const userController = {
     if (filter !== "") {
       const user_document = filter.match(phoneValid) ? await User.findOne({ phone: filter }) : await User.find({ _id: { $ne: mongoose.Types.ObjectId(user_id) }, user_name: { $regex: '.*' + filter + '.*' } });
 
-      if (!user_document.length) {
-
+      if (!user_document.length && !user_document) {
         users.push(await getReceiverInfo(user_id, user_document))
-
       } else {
         for (var i = 0; i < user_document.length; i++) {
           users.push(await getReceiverInfo(user_id, user_document[i]));
