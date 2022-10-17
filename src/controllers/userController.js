@@ -1,5 +1,6 @@
 const asyncHandler = require('express-async-handler');
 const User = require('./../models/User.js');
+const Conversation = require('./../models/Conversation.js')
 const UserResponse = require('./../responses/userResponse');
 const mongoose = require('mongoose')
 
@@ -18,6 +19,15 @@ async function addFriend(user_id, receiver_id, status) {
   return user;
 }
 
+async function getReceiverInfo(sender_id, receiver) {
+  const conversation = await Conversation.findOne({ members: { $size: 2 }, 'members.user_id': { $all: [mongoose.Types.ObjectId(sender_id), mongoose.Types.ObjectId(receiver._id)] } }, { members: { $elemMatch: { user_id: mongoose.Types.ObjectId(receiver._id) } } })
+  return {
+    ...new UserResponse(receiver).custom(),
+    nick_name: conversation ? conversation.members[0].nick_name : receiver.user_name,
+    conversation: conversation ? conversation._id : null,
+  }
+}
+
 async function updateFriend(user_id, receiver_id, status) {
   const user = await User.update({ '_id': mongoose.Types.ObjectId(user_id), 'friends.user_id': receiver_id }, { '$set': { 'friends.$.status': status } });
   console.log(user)
@@ -34,15 +44,24 @@ const userController = {
   searchUser: asyncHandler(async (req, res) => {
     const { user_id, filter } = req.body;
     const phoneValid = /^0+\d{9}$/;
+    const users = [];
 
 
-    const user_document = filter.match(phoneValid) ? await User.findOne({ phone: filter }) : await User.find({ user_name: { $regex: '.*' + filter + '.*' } });
+    if (filter !== "") {
+      const user_document = filter.match(phoneValid) ? await User.findOne({ phone: filter }) : await User.find({ _id: { $ne: mongoose.Types.ObjectId(user_id) }, user_name: { $regex: '.*' + filter + '.*' } });
 
-    if (user_document) {
-      return res.json(user_document)
-    } else {
-      return res.send("cant find record")
+      if (!user_document.length) {
+
+        users.push(await getReceiverInfo(user_id, user_document))
+
+      } else {
+        for (var i = 0; i < user_document.length; i++) {
+          users.push(await getReceiverInfo(user_id, user_document[i]));
+        }
+      }
+      return res.json(users);
     }
+
   }),
   sendFriendRequest: asyncHandler(async (req, res) => {
     const { user_id, receiver_id } = req.body;
