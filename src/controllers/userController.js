@@ -7,6 +7,7 @@ const friendStatus = {
   friended: 'friended',
   pending: 'pending',
   accepting: 'accepting',
+  block: 'block'
 }
 
 async function addFriend(user_id, receiver_id, status) {
@@ -24,7 +25,7 @@ async function updateFriend(user_id, receiver_id, status) {
 }
 
 async function removeFriend(user_id, receiver_id) {
-  const user = await User.update({ '_id': mongoose.Types.ObjectId(user_id), 'friends.user_id': receiver_id }, { '$set': { 'friends.$.status': undefined, 'friends.$.user_id': undefined } });
+  const user = await User.findOneAndUpdate({ '_id': mongoose.Types.ObjectId(user_id) }, { '$pull': { 'friends': { 'user_id': receiver_id } } });
   console.log(user)
   return user;
 }
@@ -34,22 +35,13 @@ const userController = {
     const { user_id, filter } = req.body;
     const phoneValid = /^0+\d{9}$/;
 
-    if (filter.match(phoneValid)) {
-      const user_document = await User.findOne({ phone: filter });
-      console.log(user_document)
-      if (user_document) {
-        return res.json(new UserResponse(user_document).custom())
-      } else {
-        return res.send("phone is not exist")
-      }
 
+    const user_document = filter.match(phoneValid) ? await User.findOne({ phone: filter }) : await User.find({ user_name: { $regex: '.*' + filter + '.*' } });
+
+    if (user_document) {
+      return res.json(user_document)
     } else {
-      const user_document = await User.find({ user_name: { $regex: '.*' + filter + '.*' } });
-      if (user_document) {
-        return res.json(user_document)
-      } else {
-        return res.send("phone is not exist")
-      }
+      return res.send("cant find record")
     }
   }),
   sendFriendRequest: asyncHandler(async (req, res) => {
@@ -75,20 +67,40 @@ const userController = {
     const { user_id, receiver_id, is_accept } = req.body;
 
     const user_document = await User.findOne({
-      '_id': mongoose.Types.ObjectId(user_id),
-      'friends.user_id': receiver_id
+      '_id': mongoose.Types.ObjectId(user_id)
     })
 
-    if (is_accept === true) {
+    var user_document_friends = user_document.friends.filter((e) => {
+      return e.user_id == receiver_id;
+    })
 
-      const user = await updateFriend(user_id, receiver_id, friendStatus.friended)
-      await updateFriend(receiver_id, user_id, friendStatus.friended)
+    console.log(user_document_friends[0])
 
-      return res.status(200).json({ 'user': new UserResponse(user).custom() })
+    if (user_document_friends.length === 0) {
+      return res.status(400).send('you not have request from this user')
+    } else if (user_document_friends[0].status === friendStatus.accepting) {
+      if (is_accept) {
+        const user = await updateFriend(user_id, receiver_id, friendStatus.friended)
+        // if (user.friends.) {}
+        if (user) {
+          await updateFriend(receiver_id, user_id, friendStatus.friended)
+          return res.status(200).send("Now! You already have a new friend")
+        } else {
+          res.status(400).send("you no have request friend from this user")
+        }
+      } else {
+        const user = await removeFriend(user_id, receiver_id)
+        if (user) {
+          await removeFriend(receiver_id, user_id)
+          return res.send("denied request user success");
+        } else {
+          res.status(400).send("you no have request friend from this user")
+        }
+      }
+    } else if (user_document_friends[0].status === friendStatus.friended) {
+      return res.status(400).send('you and this user is friended')
     } else {
-      await removeFriend(user_id, receiver_id)
-      await removeFriend(receiver_id, user_id)
-      return res.send("already send requset friend");
+      return res.send("you are not have permission accept this user")
     }
   }),
   getAll: asyncHandler(async (req, res) => {

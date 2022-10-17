@@ -64,7 +64,7 @@ io.on("connection", (socket) => {
     const { senderId, receiverId } = data;
     const socketId = _userOnlines.get(receiverId);
     socket.to(socketId).emit("getFriendRequest", {
-
+      senderId
     });
   })
 
