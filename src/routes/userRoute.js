@@ -33,7 +33,7 @@ const userRoute = express.Router();
  *                type: string
  *              status:
  *                type: string
- *                description: pending | friended | block
+ *                description: pending | friended | block | accepting
  *       example:
  *         _id: ObjectId('634255ff21fbe65180fa2f07')
  *         user_name: Omnibus
@@ -43,9 +43,11 @@ const userRoute = express.Router();
  *         friends: [{user_id: ObjectId('634269dc94c619b6b3671246'), status: friended}, {user_id: ObjectId('634283e662e59562ae46d1f3'), status: pending}]
  */
 
-userRoute.post('/add-friend', userController.addFriend);
+// userRoute.post('/add-friend', userController.addFriend);
+userRoute.post('/send-friend-request', userController.sendFriendRequest);
+userRoute.post('/confirm-friend-request', userController.confirmFriendRequest);
 
 userRoute.post('/search', userController.searchUser);
-// userRoute.post('/list', userController.getAll);
+userRoute.post('/id', userController.getById);
 
 module.exports = userRoute;

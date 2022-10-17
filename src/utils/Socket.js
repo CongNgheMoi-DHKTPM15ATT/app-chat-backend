@@ -59,9 +59,15 @@ io.on("connection", (socket) => {
       nick_name,
       receiverId,
     });
-    console.log(socketId);
-    console.log(_userOnlines);
   });
+  
+  socket.on('sendFriendRequest', (data) => {
+    const { senderId, receiverId } = data;
+    const socketId = _userOnlines.get(receiverId);
+    socket.to(socketId).emit("getFriendRequest", {
+      senderId
+    });
+  })
 
   // when disconnect
   socket.on("disconnect", () => {
