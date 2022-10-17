@@ -68,6 +68,25 @@ io.on("connection", (socket) => {
     });
   })
 
+  socket.on('acceptFriendRequest', (data) => {
+    const { senderId, receiverId } = data;
+    console.log('object')
+    const socketId = _userOnlines.get(receiverId);
+    socket.to(socketId).emit("getFriendResponse", {
+      senderId,
+      msg: `${senderId} accept you`
+    });
+  })
+
+  socket.on('deniedFriendRequest', (data) => {
+    const { senderId, receiverId } = data;
+    const socketId = _userOnlines.get(receiverId);
+    socket.to(socketId).emit("getFriendResponse", {
+      senderId,
+      msg: `${senderId} denied you`
+    });
+  })
+
   // when disconnect
   socket.on("disconnect", () => {
     console.log("a user disconnected!");
