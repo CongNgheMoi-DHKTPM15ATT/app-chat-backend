@@ -63,7 +63,7 @@ io.on("connection", (socket) => {
 
   socket.on("sendFiles", (data) => {
     const { senderId, receiverId, files } = data;
-    console.log(data);
+    console.log("files: " + JSON.parse(files));
     const socketId = _userOnlines.get(receiverId);
     socket.emit("load-conver");
     socket.to(socketId).emit("getFiles", {

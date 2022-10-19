@@ -150,5 +150,6 @@ userRoute.post('/confirm-friend-request', userController.confirmFriendRequest);
 
 userRoute.post('/search', userController.searchUser);
 userRoute.post('/id', userController.getById);
+userRoute.post('/get-friends-pending', userController.getFriendsPending);
 
 module.exports = userRoute;

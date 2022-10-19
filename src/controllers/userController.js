@@ -51,7 +51,6 @@ const userController = {
     const phoneValid = /^0+\d{9}$/;
     const users = [];
 
-
     if (filter !== "") {
       const user_document = filter.match(phoneValid) ? await User.findOne({ phone: filter }) : await User.find({ _id: { $ne: mongoose.Types.ObjectId(user_id) }, user_name: { $regex: '.*' + filter + '.*' } });
 
@@ -62,7 +61,6 @@ const userController = {
         } else {
           return res.json(users)
         }
-
       } else {
         for (var i = 0; i < user_document.length; i++) {
           users.push(await getReceiverInfo(user_id, user_document[i]));
@@ -71,6 +69,36 @@ const userController = {
       return res.json(users);
     }
 
+  }),
+  getFriendsPending: asyncHandler(async (req, res) => {
+    const { user_id } = req.body;
+    const users = [];
+
+    const user_document = await User.aggregate([{
+      $match: {
+        "_id": mongoose.Types.ObjectId(user_id),
+      }
+    }, {
+      $project: {
+        friends: {
+          $filter: {
+            input: '$friends',
+            as: 'friend',
+            cond: { $eq: ['$$friend.status', friendStatus.pending] }
+          }
+        }
+      }
+    }]);
+    user_documents = await User.populate(user_document[0].friends, { "path": 'user_id' });
+
+    user_documents.forEach((user) => {
+      users.push({
+        ...new UserResponse(user.user_id).custom(),
+        status: user.status
+      })
+    })
+
+    res.json(users);
   }),
   sendFriendRequest: asyncHandler(async (req, res) => {
     const { user_id, receiver_id } = req.body;
