@@ -5,10 +5,10 @@ const UserResponse = require('./../responses/userResponse');
 const mongoose = require('mongoose')
 
 const friendStatus = {
-  friended: 'friended',
-  pending: 'pending',
-  accepting: 'accepting',
-  block: 'block'
+  friended: 'FRIENDED',
+  pending: 'PENDING',
+  accepting: 'ACCEPTING',
+  block: 'BLOCK'
 }
 
 async function addFriend(user_id, receiver_id, status) {
@@ -71,7 +71,7 @@ const userController = {
 
   }),
   getFriendsPending: asyncHandler(async (req, res) => {
-    const { user_id } = req.body;
+    const { user_id, status } = req.body;
     const users = [];
 
     const user_document = await User.aggregate([{
@@ -84,7 +84,7 @@ const userController = {
           $filter: {
             input: '$friends',
             as: 'friend',
-            cond: { $eq: ['$$friend.status', friendStatus.pending] }
+            cond: { $eq: ['$$friend.status', status.toUpperCase()] }
           }
         }
       }
