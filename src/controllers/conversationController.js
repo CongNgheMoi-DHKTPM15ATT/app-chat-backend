@@ -1,6 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const Conversation = require("./../models/Conversation.js");
-const ConversationResponse = require("./../responses/ConversationResponse.js")
+const ConversationResponse = require("./../responses/conversationResponse.js")
 const Message = require("./../models/Message.js");
 const User = require("./../models/User.js");
 

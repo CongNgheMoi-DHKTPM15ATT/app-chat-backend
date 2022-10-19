@@ -10,7 +10,6 @@ const authController = {
     try {
 
       const { user_name, password, email, phone } = req.body;
-      console.log(email);
       const passwordEncoded = await bcrypt.hash(password, await bcrypt.genSalt(10))
       const createUser = new User({ user_name, email, phone, 'password': passwordEncoded, })
 
