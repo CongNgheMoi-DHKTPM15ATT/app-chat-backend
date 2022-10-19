@@ -35,7 +35,7 @@ const authController = {
     if (user_document) {
       const validPassword = await bcrypt.compare(password, user_document.password);
       if (validPassword) {
-        const token = jwt.sign({ user_name, password: user_document.password }, process.env.JWT_SECRET_KEY)
+        const token = jwt.sign({ phone, password: user_document.password }, process.env.JWT_SECRET_KEY)
         console.log(token);
 
 
