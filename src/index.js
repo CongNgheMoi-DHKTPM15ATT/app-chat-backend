@@ -82,7 +82,7 @@ app.use('/api/conversation', conversationRoute);
 
 app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(specs));
 
-server.listen(process.env.PORT || 2056, () => {
+server.listen(process.env.PORT || 3068, () => {
   console.log(`Express running => PORT ${server.address().port}`);
   connectDatabase();
 });
