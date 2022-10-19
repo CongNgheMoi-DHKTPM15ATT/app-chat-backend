@@ -1,5 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const Message = require("./../models/Message.js");
+const MessageResponse = require("./../responses/messageResponse")
 const Conversation = require("./../models/Conversation.js");
 const User = require("./../models/User.js");
 const { ObjectId } = require("mongoose");
@@ -9,8 +10,8 @@ const messageController = {
     const { conversation_id } = req.body;
     console.log("conver: " + conversation_id);
     const messages_document = await Message.find({
-      conversation: conversation_id,
-    })
+        conversation: conversation_id,
+      })
       .populate({
         path: "conversation",
       })
@@ -30,13 +31,8 @@ const messageController = {
         }
       });
       messages.push({
-        _id: message._id,
-        content: message.content,
-        content_type: message.content_type,
-        deleted: false,
+        ...new MessageResponse(message).custom(),
         sender: sender,
-        createdAt: message.createdAt,
-        updatedAt: message.updatedAt,
       });
     });
     messages.reverse();
@@ -62,12 +58,9 @@ const messageController = {
 
       console.log(conversation_id);
 
-      const conversation = await Conversation.findByIdAndUpdate(
-        { _id: conversation_id },
-        {
-          last_message: message._id,
-        }
-      );
+      const conversation = await Conversation.findByIdAndUpdate({ _id: conversation_id }, {
+        last_message: message._id,
+      });
 
       if (message)
         return res

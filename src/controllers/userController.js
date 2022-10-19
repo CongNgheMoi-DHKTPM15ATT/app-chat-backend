@@ -114,7 +114,7 @@ const userController = {
           await updateFriend(receiver_id, user_id, friendStatus.friended)
           return res.status(200).send("Now! You already have a new friend")
         } else {
-          res.status(400).send("you no have request friend from this user")
+          res.status(400).send("you no have request from this user")
         }
       } else {
         const user = await removeFriend(user_id, receiver_id)

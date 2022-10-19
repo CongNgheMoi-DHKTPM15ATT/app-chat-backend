@@ -1,5 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const Conversation = require("./../models/Conversation.js");
+const ConversationResponse = require("./../responses/ConversationResponse.js")
 const Message = require("./../models/Message.js");
 const User = require("./../models/User.js");
 
@@ -58,27 +59,13 @@ const conversationController = {
             // receiver.set('avatar', user.avatar || 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/2048px-User-avatar.svg.png')
             if (!(conversation.last_message === undefined)) {
               conversations.push({
-                _id: conversation._id,
-                nick_name: user_document,
-                is_room: conversation.is_room,
-                seen_last_messages: conversation.seen_last_messages,
+                ...new ConversationResponse(conversation).custom(),
                 receiver: {
                   _id: receiver_document.user_id._id,
                   nick_name: receiver_document.nick_name,
-
-                  avatar: receiver_document.user_id.avatar ||
-
-                    "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/2048px-User-avatar.svg.png",
+                  avatar: receiver_document.user_id.avatar || "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/2048px-User-avatar.svg.png",
                 },
-                last_message: {
-                  _id: conversation.last_message._id,
-                  content: conversation.last_message.content,
-                  content_type: conversation.last_message.content_type,
-                  deleted: conversation.last_message.deleted,
-                  createdAt: conversation.last_message.createdAt,
-                },
-                createdAt: conversation.createAt,
-                updatedAt: conversation.updateAt,
+
               });
             }
           } else if (conversation.members.length === 1) {

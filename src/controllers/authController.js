@@ -30,8 +30,8 @@ const authController = {
     }
   }),
   login: asyncHandler(async (req, res) => {
-    const { user_name, password } = req.body;
-    const user_document = await User.findOne({ user_name });
+    const { phone, password } = req.body;
+    const user_document = await User.findOne({ phone });
     if (user_document) {
       const validPassword = await bcrypt.compare(password, user_document.password);
       if (validPassword) {

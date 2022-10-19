@@ -61,6 +61,16 @@ io.on("connection", (socket) => {
     });
   });
 
+  socket.on("sendFiles", (data) => {
+    const { senderId, receiverId, files } = data;
+    console.log(data);
+    const socketId = _userOnlines.get(receiverId);
+    socket.emit("load-conver");
+    socket.to(socketId).emit("getFiles", {
+      files
+    });
+  });
+
   socket.on('sendFriendRequest', (data) => {
     const { senderId, receiverId } = data;
     const socketId = _userOnlines.get(receiverId);
