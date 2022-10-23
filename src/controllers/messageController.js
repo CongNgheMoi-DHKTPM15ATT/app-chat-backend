@@ -1,6 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const Message = require("./../models/Message.js");
-const MessageResponse = require("./../responses/messageResponse")
+const MessageResponse = require("./../responses/messageResponse");
 const Conversation = require("./../models/Conversation.js");
 const User = require("./../models/User.js");
 const { ObjectId } = require("mongoose");
@@ -10,8 +10,8 @@ const messageController = {
     const { conversation_id } = req.body;
     console.log("conver: " + conversation_id);
     const messages_document = await Message.find({
-        conversation: conversation_id,
-      })
+      conversation: conversation_id,
+    })
       .populate({
         path: "conversation",
       })
@@ -48,19 +48,23 @@ const messageController = {
   save: asyncHandler(async (req, res, next) => {
     try {
       console.log("start save msg");
-      const { sender_id, conversation_id, text } = req.body;
+      const { sender_id, conversation_id, text, content_type } = req.body;
 
       const message = await new Message({
         sender: sender_id,
         content: text,
+        content_type: content_type,
         conversation: conversation_id,
       }).save();
 
-      console.log(conversation_id);
+      console.log(message);
 
-      const conversation = await Conversation.findByIdAndUpdate({ _id: conversation_id }, {
-        last_message: message._id,
-      });
+      const conversation = await Conversation.findByIdAndUpdate(
+        { _id: conversation_id },
+        {
+          last_message: message._id,
+        }
+      );
 
       if (message)
         return res
