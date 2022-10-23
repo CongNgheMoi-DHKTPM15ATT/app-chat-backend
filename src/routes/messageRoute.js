@@ -1,5 +1,5 @@
-const express = require('express');
-const messageController = require('./../controllers/messageController');
+const express = require("express");
+const messageController = require("./../controllers/messageController");
 
 const messageRoute = express.Router();
 
@@ -10,7 +10,7 @@ const messageRoute = express.Router();
  *     Message:
  *       type: object
  *       properties:
- *         _id: 
+ *         _id:
  *           type: object
  *           description: The auto-generated id
  *         sender:
@@ -44,6 +44,8 @@ const messageRoute = express.Router();
  *                type: string
  *              conversation_id:
  *                type: string
+ *              content_type:
+ *                 type: string
  *              text:
  *                type: string
  *      responses:
@@ -60,11 +62,11 @@ const messageRoute = express.Router();
  *                conversation: 634a847f71044545e3e5408d
  *                createdAt: 2022-10-15T17:14:36.942Z
  *                updatedAt: 2022-10-15T17:14:36.942Z
- *                 
+ *
  */
 
 // /api/messages/send
-messageRoute.post('/send', messageController.save);
+messageRoute.post("/send", messageController.save);
 
 /**
  *  @swagger
@@ -100,10 +102,10 @@ messageRoute.post('/send', messageController.save);
  *                     }
  *                   }
  *                ]
- *                 
+ *
  */
 
 // messageRoute.get('/lastMessages', messageController.getLastMessages);
-messageRoute.post('', messageController.getMessageByConversation);
+messageRoute.post("", messageController.getMessageByConversation);
 
 module.exports = messageRoute;
