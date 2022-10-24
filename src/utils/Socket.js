@@ -33,12 +33,10 @@ io.on("connection", (socket) => {
   socket.on("addUser", (data) => {
     const { senderId } = data;
     addUser(senderId, socket);
-    console.log(_userOnlines);
   });
 
   socket.on("send", (data) => {
     const { senderId, receiverId, text, nick_name } = data;
-    console.log(data);
     const socketId = _userOnlines.get(receiverId);
     socket.emit("load-conver");
     socket.to(socketId).emit("getMessage", {
@@ -69,7 +67,6 @@ io.on("connection", (socket) => {
 
   socket.on("acceptFriendRequest", (data) => {
     const { senderId, receiverId } = data;
-    console.log("object");
     const socketId = _userOnlines.get(receiverId);
     socket.to(socketId).emit("getFriendResponse", {
       senderId,
@@ -98,7 +95,6 @@ io.on("connection", (socket) => {
       receiverId: receiverId,
     });
     socket.on("connect_video_call", () => {
-      console.log("step 2");
       io.to(socketId).emit("callUser", {
         signal: signalData,
         from: senderId,
