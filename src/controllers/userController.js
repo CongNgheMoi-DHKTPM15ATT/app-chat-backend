@@ -46,7 +46,6 @@ async function getReceiverInfo(sender_id, receiver) {
       console.log("haha")
       return null
     }
-
   } else {
 
     return null;

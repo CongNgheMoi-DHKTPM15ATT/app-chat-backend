@@ -10,8 +10,8 @@ const messageController = {
     const { conversation_id } = req.body;
     console.log("conver: " + conversation_id);
     const messages_document = await Message.find({
-      conversation: conversation_id,
-    })
+        conversation: conversation_id,
+      })
       .populate({
         path: "conversation",
       })
@@ -59,12 +59,9 @@ const messageController = {
 
       console.log(message);
 
-      const conversation = await Conversation.findByIdAndUpdate(
-        { _id: conversation_id },
-        {
-          last_message: message._id,
-        }
-      );
+      const conversation = await Conversation.findByIdAndUpdate({ _id: conversation_id }, {
+        last_message: message._id,
+      });
 
       if (message)
         return res
@@ -78,8 +75,17 @@ const messageController = {
       next(ex);
     }
   }),
-  recovery: asyncHandler((req, res) => {
+  recovery: asyncHandler(async (req, res) => {
+    const { _id } = req.body;
 
+    const doc = await Message.findByIdAndUpdate(_id, { deleted: 'true', content: 'Tin nhắn đã dược thu hồi', content_type: 'text' })
+    console.log(doc.deleted)
+
+    if (doc.deleted === true) {
+      return res.json({ 'msg': 'Recover message successfully', data: doc })
+    } else {
+      return res.json({ 'msg': 'Recover message Failed' });
+    }
   }),
 };
 

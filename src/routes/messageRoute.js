@@ -107,5 +107,7 @@ messageRoute.post("/send", messageController.save);
 
 // messageRoute.get('/lastMessages', messageController.getLastMessages);
 messageRoute.post("", messageController.getMessageByConversation);
+messageRoute.post("/recover", messageController.recovery);
+
 
 module.exports = messageRoute;
