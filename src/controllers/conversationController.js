@@ -119,12 +119,12 @@ const conversationController = {
       console.log(groupChat)
     }
 
-    console.log(groupChat._id)
+    console.log(groupChat)
 
     conversation = await new Conversation({
       members: members,
       is_group: members.length === 2 ? false : true,
-      receiver: groupChat._id || undefined,
+      receiver: groupChat || undefined,
     }).save();
 
     res.status(200).json(conversation);
