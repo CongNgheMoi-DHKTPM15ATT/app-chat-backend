@@ -3,16 +3,21 @@ const User = require('./../models/User.js');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const UserResponse = require('./../responses/userResponse');
-
+const { generateAvatar } = require('./../utils/generateAvatar');
 
 const authController = {
   register: asyncHandler(async (req, res) => {
     try {
-
       const { user_name, password, email, phone } = req.body;
 
       const passwordEncoded = await bcrypt.hash(password, await bcrypt.genSalt(10))
-      const createUser = new User({ user_name, email, phone, 'password': passwordEncoded, })
+      const createUser = new User({
+        user_name,
+        email,
+        phone,
+        'password': passwordEncoded,
+        'avatar': generateAvatar(user_name, "white", "#009578"),
+      })
 
       const newUser = await createUser.save();
 
@@ -48,6 +53,9 @@ const authController = {
     }
   }),
   logout: asyncHandler(async (req, res) => {
+
+  }),
+  changePassword: asyncHandler(async (req, res) => {
 
   }),
 }

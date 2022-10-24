@@ -32,8 +32,10 @@ io.on("connection", (socket) => {
 
   socket.on("addUser", (data) => {
     const { senderId } = data;
+
     addUser(senderId, socket);
     console.log(_userOnlines);
+
   });
 
   socket.on("send", (data) => {
@@ -41,13 +43,14 @@ io.on("connection", (socket) => {
     console.log(data);
     const socketId = _userOnlines.get(receiverId);
     socket.emit("load-conver");
-    socket.to(socketId).emit("getMessage", {
+    socket.in(socketId).emit("getMessage", {
       senderId,
       text,
       nick_name,
       receiverId,
     });
   });
+
 
   socket.on("sendFiles", (data) => {
     const { senderId, receiverId, files } = data;
@@ -60,6 +63,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("sendFriendRequest", (data) => {
+
     const { senderId, receiverId } = data;
     const socketId = _userOnlines.get(receiverId);
     socket.to(socketId).emit("getFriendRequest", {
@@ -84,6 +88,13 @@ io.on("connection", (socket) => {
       senderId,
       msg: `${senderId} denied you`,
     });
+
+  })
+
+  // when disconnect
+  socket.on("disconnect", () => {
+    console.log("a user disconnected!");
+    io.emit("getUsers", _userOnlines);
   });
 
   // socket.on("callUser", (data) => {

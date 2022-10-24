@@ -1,6 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const Message = require("./../models/Message.js");
-const MessageResponse = require("./../responses/messageResponse")
+const MessageResponse = require("./../responses/messageResponse");
 const Conversation = require("./../models/Conversation.js");
 const User = require("./../models/User.js");
 const { ObjectId } = require("mongoose");
@@ -48,15 +48,16 @@ const messageController = {
   save: asyncHandler(async (req, res, next) => {
     try {
       console.log("start save msg");
-      const { sender_id, conversation_id, text } = req.body;
+      const { sender_id, conversation_id, text, content_type } = req.body;
 
       const message = await new Message({
         sender: sender_id,
         content: text,
+        content_type: content_type,
         conversation: conversation_id,
       }).save();
 
-      console.log(conversation_id);
+      console.log(message);
 
       const conversation = await Conversation.findByIdAndUpdate({ _id: conversation_id }, {
         last_message: message._id,
@@ -72,6 +73,18 @@ const messageController = {
           .json({ message: "Failed to add message to the database" });
     } catch (ex) {
       next(ex);
+    }
+  }),
+  recovery: asyncHandler(async (req, res) => {
+    const { _id } = req.body;
+
+    const doc = await Message.findByIdAndUpdate(_id, { deleted: 'true', content: 'Tin nhắn đã dược thu hồi', content_type: 'text' })
+    console.log(doc.deleted)
+
+    if (doc.deleted === true) {
+      return res.json({ 'msg': 'Recover message successfully', data: doc })
+    } else {
+      return res.json({ 'msg': 'Recover message Failed' });
     }
   }),
 };
