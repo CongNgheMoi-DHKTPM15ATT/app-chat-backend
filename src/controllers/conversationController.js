@@ -3,12 +3,13 @@ const Conversation = require("./../models/Conversation.js");
 const ConversationResponse = require("./../responses/conversationResponse.js")
 const Message = require("./../models/Message.js");
 const User = require("./../models/User.js");
+const GroupChat = require("./../models/GroupChat.js")
+const { generateAvatar } = require('./../utils/generateAvatar');
 
 async function getUsers(user_ids) {
   const users = [];
   for (i in user_ids) {
     let user = await User.findOne({ _id: user_ids[i] });
-    console.log(user);
     users.push(user);
   }
   return users;
@@ -57,13 +58,14 @@ const conversationController = {
             // }
             // conversation.set('receiver', await User.findById({ _id: user_temp_id }));
             // receiver.set('avatar', user.avatar || 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/2048px-User-avatar.svg.png')
+
             if (!(conversation.last_message === undefined)) {
               conversations.push({
                 ...new ConversationResponse(conversation).custom(),
                 receiver: {
                   _id: receiver_document.user_id._id,
                   nick_name: receiver_document.nick_name,
-                  avatar: receiver_document.user_id.avatar || "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/2048px-User-avatar.svg.png",
+                  avatar: receiver_document.user_id.avatar || generateAvatar(receiver_document.user_id.user_name, "white", "#009578"),
                 },
 
               });
@@ -101,20 +103,28 @@ const conversationController = {
   create: asyncHandler(async (req, res, next) => {
     const { user_id } = req.body;
 
-    console.log(user_id);
-
     const users = await getUsers(user_id);
-
-    console.log("data " + users);
 
     const members = [];
     users.forEach((user) => {
       members.push({ user_id: user._id, nick_name: user.user_name });
     });
+    let groupChat = null;
+    if (members.length > 2) {
+      const nameGroupChat = `${members[0].nick_name}, ${members[1].nick_name}, ${members[2].nick_name}`
+      groupChat = await GroupChat.create({
+        name: members.length > 3 ? `${nameGroupChat},...` : nameGroupChat,
+        avatar: generateAvatar("Group", "white", "#FFCC66")
+      })
+      console.log(groupChat)
+    }
+
+    console.log(groupChat._id)
 
     conversation = await new Conversation({
       members: members,
-      is_room: members.length === 2 ? false : true,
+      is_group: members.length === 2 ? false : true,
+      receiver: groupChat._id || undefined,
     }).save();
 
     res.status(200).json(conversation);

@@ -1,8 +1,10 @@
-const asyncHandler = require("express-async-handler");
-const User = require("./../models/User.js");
-const Conversation = require("./../models/Conversation.js");
-const UserResponse = require("./../responses/userResponse");
-const mongoose = require("mongoose");
+const asyncHandler = require('express-async-handler');
+const User = require('./../models/User.js');
+const Conversation = require('./../models/Conversation.js')
+const UserResponse = require('./../responses/userResponse');
+const mongoose = require('mongoose')
+const BaseRepository = require('./../repositories/BaseRepository')
+
 
 const friendStatus = {
   friended: "FRIENDED",
@@ -19,31 +21,29 @@ async function addFriend(user_id, receiver_id, status) {
   return user;
 }
 
+async function statusSenderRelativeWithReceiver(sender_id, receiver_id) {
+  senderRelativeWithReceiver = await User.findById({ _id: sender_id }, { friends: { $elemMatch: { user_id: mongoose.Types.ObjectId(receiver_id) } } });
+
+  const status = senderRelativeWithReceiver.friends.length !== 0 ? senderRelativeWithReceiver.friends[0].status : null;
+  return await status;
+}
+
 async function getReceiverInfo(sender_id, receiver) {
+
   if (receiver) {
-    const conversation = await Conversation.findOne(
-      {
-        members: { $size: 2 },
-        "members.user_id": {
-          $all: [
-            mongoose.Types.ObjectId(sender_id),
-            mongoose.Types.ObjectId(receiver._id),
-          ],
-        },
-      },
-      {
-        members: {
-          $elemMatch: { user_id: mongoose.Types.ObjectId(receiver._id) },
-        },
+    const conversation = await Conversation.findOne({ members: { $size: 2 }, 'members.user_id': { $all: [mongoose.Types.ObjectId(sender_id), mongoose.Types.ObjectId(receiver._id)] } }, { members: { $elemMatch: { user_id: mongoose.Types.ObjectId(receiver._id) } } })
+    const statusBetweenSenderReceiver = await statusSenderRelativeWithReceiver(sender_id, receiver._id);
+    if (statusBetweenSenderReceiver !== friendStatus.block) {
+      // console.log("check status" + statusBetweenSenderReceiver)
+      return {
+        ...new UserResponse(receiver).customWithoutFriends(),
+        nick_name: conversation ? conversation.members[0].nick_name : receiver.user_name,
+        conversation: conversation ? conversation._id : null,
+        status: statusBetweenSenderReceiver ? statusBetweenSenderReceiver : null
       }
-    );
-    return {
-      ...new UserResponse(receiver).custom(),
-      nick_name: conversation
-        ? conversation.members[0].nick_name
-        : receiver.user_name,
-      conversation: conversation ? conversation._id : null,
-    };
+    } else {
+      return null
+    }
   } else {
     return null;
   }
@@ -67,30 +67,41 @@ async function removeFriend(user_id, receiver_id) {
   return user;
 }
 
+const mondel = "User"
+
+const baseRepository = new BaseRepository(mondel)
+
+const userRepository = {
+  getAll: asyncHandler(async (req, res) => { await baseRepository.getAll(req, res) }),
+  findById: asyncHandler(async (req, res) => { await baseRepository.findById(req, res) }),
+  update: asyncHandler(async (req, res) => { await baseRepository.update(req, res) }),
+}
+
 const userController = {
+  ...userRepository,
   searchUser: asyncHandler(async (req, res) => {
     const { user_id, filter } = req.body;
     const phoneValid = /^0+\d{9}$/;
     const users = [];
 
     if (filter !== "") {
-      const user_document = filter.match(phoneValid)
-        ? await User.findOne({ phone: filter })
-        : await User.find({
-            _id: { $ne: mongoose.Types.ObjectId(user_id) },
-            user_name: { $regex: ".*" + filter + ".*" },
-          });
 
-      if (!user_document.length) {
-        console.log(user_document);
-        if (user_document._id) {
-          users.push(await getReceiverInfo(user_id, user_document));
+      const user_receiver_document = filter.match(phoneValid) ? await User.findOne({ phone: filter }) : await User.find({ _id: { $ne: mongoose.Types.ObjectId(user_id) }, user_name: { $regex: '.*' + filter + '.*' } });
+      if (!user_receiver_document.length) {
+        console.log(user_receiver_document)
+        if (user_receiver_document._id) {
+          users.push(await getReceiverInfo(user_id, user_receiver_document))
         } else {
           return res.json(users);
         }
       } else {
-        for (var i = 0; i < user_document.length; i++) {
-          users.push(await getReceiverInfo(user_id, user_document[i]));
+        for (var i = 0; i < user_receiver_document.length; i++) {
+          userInfo = await getReceiverInfo(user_id, user_receiver_document[i])
+          console.log(userInfo)
+          if (userInfo != null) {
+
+            users.push(userInfo);
+          }
         }
       }
       return res.json(users);
@@ -146,9 +157,39 @@ const userController = {
 
       return res.status(200).json({ user: new UserResponse(user).custom() });
     } else {
-      return res.send("already send requset friend");
+      return res.send("already send request friend");
     }
   }),
+  cancelRequestPending: asyncHandler(async (req, res) => {
+    const { user_id, receiver_id } = req.body;
+    const statusBetweenSenderReceiver = await statusSenderRelativeWithReceiver(user_id, receiver_id);
+
+    if (statusBetweenSenderReceiver === friendStatus.pending) {
+      const user = removeFriend(user_id, receiver_id)
+      return res.json({ msg: "Cancel request pending success" })
+    } else {
+      return res.json({ msg: "you not have pending request" })
+    }
+
+  }),
+  blockFriend: asyncHandler(async (req, res) => {
+    const { user_id, receiver_id } = req.body;
+
+    const user_document = await User.findOne({
+      '_id': mongoose.Types.ObjectId(user_id),
+      'friends.user_id': receiver_id
+    })
+
+    let user;
+    if (user_document === null) {
+      const user = await addFriend(user_id, receiver_id, friendStatus.block)
+    } else {
+      const user = await updateFriend(user_id, receiver_id, friendStatus.block)
+
+    }
+    return res.status(200).json({ 'msg': 'block user success' })
+  }),
+
   confirmFriendRequest: asyncHandler(async (req, res) => {
     const { user_id, receiver_id, is_accept } = req.body;
 
@@ -193,10 +234,10 @@ const userController = {
       return res.send("you are not have permission accept this user");
     }
   }),
-  getAll: asyncHandler(async (req, res) => {
-    const users = await User.find({});
-    return res.status(200).json(users);
-  }),
+  // getAll: asyncHandler(async (req, res) => {
+  //   const users = await new BaseRepository(User).getAll();
+  //   return res.status(200).json(users);
+  // }),
   getById: asyncHandler(async (req, res) => {
     try {
       const { _id } = req.body;

@@ -10,7 +10,7 @@ const ConversationSchema = new mongoose.Schema({
     }]
   },
   receiver: { type: Object },
-  is_room: { type: Boolean, default: false },
+  is_group: { type: Boolean, default: false },
   last_message: { type: mongoose.Schema.Types.ObjectId, ref: "Message" },
   seen_last_messages: { type: Boolean, require: true, default: false }
 }, { timestamps: true })
