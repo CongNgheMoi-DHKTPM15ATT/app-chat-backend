@@ -4,6 +4,7 @@ const MessageResponse = require("./../responses/messageResponse");
 const Conversation = require("./../models/Conversation.js");
 const User = require("./../models/User.js");
 const { ObjectId } = require("mongoose");
+const { generateAvatar } = require('./../utils/generateAvatar');
 
 const messageController = {
   getMessageByConversation: asyncHandler(async (req, res, next) => {
@@ -22,10 +23,12 @@ const messageController = {
 
     messages_document.forEach((message) => {
       message.conversation.members.forEach((member) => {
+
         if (member.user_id.toString() === message.sender._id.toString()) {
           sender = {
             user_id: member.user_id,
             nick_name: member.nick_name,
+            avatar: message.sender.avatar || generateAvatar(message.sender.user_name, "white", "#009578")
           };
           return;
         }

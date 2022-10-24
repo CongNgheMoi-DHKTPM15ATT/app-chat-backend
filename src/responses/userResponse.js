@@ -1,3 +1,5 @@
+const { generateAvatar } = require('./../utils/generateAvatar');
+
 module.exports = class UserRespone {
   constructor(user) {
     this.user = user
@@ -10,6 +12,7 @@ module.exports = class UserRespone {
       "birth_day": this.user.birth_day,
       "friends": this.user.friends,
       "phone": this.user.phone,
+      "avatar": this.user.avatar || generateAvatar(this.user.user_name, "white", "#009578"),
       "createdAt": this.user.createdAt,
       "updatedAt": this.user.updatedAt,
     }
@@ -20,6 +23,7 @@ module.exports = class UserRespone {
       "user_name": this.user.user_name,
       "birth_day": this.user.birth_day,
       "phone": this.user.phone,
+      "avatar": this.user.avatar || generateAvatar(this.user.user_name, "white", "#009578"),
       "createdAt": this.user.createdAt,
       "updatedAt": this.user.updatedAt,
     }
