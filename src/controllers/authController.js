@@ -50,6 +50,9 @@ const authController = {
   logout: asyncHandler(async (req, res) => {
 
   }),
+  changePassword: asyncHandler(async (req, res) => {
+
+  }),
 }
 
 module.exports = authController;

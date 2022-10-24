@@ -2,9 +2,11 @@ const express = require('express');
 const morgan = require('morgan');
 const dotenv = require('dotenv');
 const bodyParser = require('body-parser');
+const multer = require("multer");
 
 const { connectDatabase } = require('./utils/connectDB');
 const socketApi = require('./utils/Socket')
+const { s3Uploadv2, s3Uploadv3 } = require("./utils/S3Service");
 
 const authRoute = require('./routes/authRoute');
 const userRoute = require('./routes/userRoute');
@@ -75,12 +77,47 @@ app.get('/', (req, res) => {
   res.send("haha")
 })
 
+const upload = multer({
+  limits: { fileSize: 1000000000, files: 2 },
+});
+
+app.post("/upload", upload.array("file"), async (req, res) => {
+  try {
+    const results = await s3Uploadv2(req.files);
+    return res.json({ status: "success", results });
+  } catch (err) {
+    console.log(err);
+  }
+});
+
 app.use('/api/auth', authRoute);
 app.use('/api/user', userRoute);
 app.use('/api/messages', messageRoute);
 app.use('/api/conversation', conversationRoute);
 
 app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(specs));
+
+app.use((error, req, res, next) => {
+  if (error instanceof multer.MulterError) {
+    if (error.code === "LIMIT_FILE_SIZE") {
+      return res.status(400).json({
+        message: "file is too large",
+      });
+    }
+
+    if (error.code === "LIMIT_FILE_COUNT") {
+      return res.status(400).json({
+        message: "File limit reached",
+      });
+    }
+
+    if (error.code === "LIMIT_UNEXPECTED_FILE") {
+      return res.status(400).json({
+        message: "File must be an image",
+      });
+    }
+  }
+});
 
 server.listen(process.env.PORT || 3068, () => {
   console.log(`Express running => PORT ${server.address().port}`);

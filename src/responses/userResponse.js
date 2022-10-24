@@ -14,4 +14,14 @@ module.exports = class UserRespone {
       "updatedAt": this.user.updatedAt,
     }
   }
+  customWithoutFriends() {
+    return {
+      "_id": this.user._id,
+      "user_name": this.user.user_name,
+      "birth_day": this.user.birth_day,
+      "phone": this.user.phone,
+      "createdAt": this.user.createdAt,
+      "updatedAt": this.user.updatedAt,
+    }
+  }
 }

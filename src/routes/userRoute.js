@@ -151,5 +151,11 @@ userRoute.post('/confirm-friend-request', userController.confirmFriendRequest);
 userRoute.post('/search', userController.searchUser);
 userRoute.post('/id', userController.getById);
 userRoute.post('/get-friends-pending', userController.getFriendsPending);
+userRoute.post('/block-friend', userController.blockFriend);
+userRoute.post('/cancel-request-pending', userController.cancelRequestPending)
+
+userRoute.post('/all', userController.getAll)
+userRoute.post('/id', userController.getById)
+userRoute.post('/update', userController.update)
 
 module.exports = userRoute;
