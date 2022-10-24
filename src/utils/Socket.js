@@ -1,4 +1,5 @@
 const { Server } = require("socket.io");
+const uuid = require("uuid");
 require("dotenv").config();
 
 let io = new Server({
@@ -12,43 +13,29 @@ const socketApi = {
   io: io,
 };
 
-function getByValue(map, value) {
-  for (let [key, value] of map.entries()) {
-    if (value === value) return key;
-  }
-}
-
 global._userOnlines = new Map();
+global._userCall = new Map();
 
-const addUser = (userId, socketId) => {
-  _userOnlines.set(userId, socketId);
-};
-
-const removeUser = (socketId) => {
-  // _userOnlines.delete(getByValue(_userOnlines, socketId));
-};
-
-const getUser = (userId) => {
-  return _userOnlines.get(userId);
+const addUser = (userId, socket) => {
+  var tmp = _userOnlines.get(userId);
+  if (tmp) {
+    socket.join(tmp);
+  } else {
+    const roomId = uuid.v4();
+    socket.join(roomId);
+    _userOnlines.set(userId, roomId);
+  }
 };
 
 io.on("connection", (socket) => {
-  //when ceonnect
-  console.log("a user connected: " + socket.id);
-
   global._io = socket;
 
-  //take userId and socketId from user
   socket.on("addUser", (data) => {
-    console.log("haha");
     const { senderId } = data;
-    if (!_userOnlines.get(senderId)) {
-      addUser(senderId, socket.id);
-      console.log(senderId);
-      console.log(_userOnlines.get(senderId));
-    }
 
-    io.emit("getUsers", senderId);
+    addUser(senderId, socket);
+    console.log(_userOnlines);
+
   });
 
   socket.on("send", (data) => {
@@ -64,38 +51,88 @@ io.on("connection", (socket) => {
     });
   });
 
-  socket.on('sendFriendRequest', (data) => {
+
+  socket.on("sendFiles", (data) => {
+    const { senderId, receiverId, files } = data;
+    console.log("files: " + JSON.parse(files));
+    const socketId = _userOnlines.get(receiverId);
+    socket.emit("load-conver");
+    socket.to(socketId).emit("getFiles", {
+      files,
+    });
+  });
+
+  socket.on("sendFriendRequest", (data) => {
+
     const { senderId, receiverId } = data;
     const socketId = _userOnlines.get(receiverId);
     socket.to(socketId).emit("getFriendRequest", {
-      senderId
+      senderId,
     });
-  })
+  });
 
-  socket.on('acceptFriendRequest', (data) => {
+  socket.on("acceptFriendRequest", (data) => {
     const { senderId, receiverId } = data;
-    console.log('object')
+    console.log("object");
     const socketId = _userOnlines.get(receiverId);
     socket.to(socketId).emit("getFriendResponse", {
       senderId,
-      msg: `${senderId} accept you`
+      msg: `${senderId} accept you`,
     });
-  })
+  });
 
-  socket.on('deniedFriendRequest', (data) => {
+  socket.on("deniedFriendRequest", (data) => {
     const { senderId, receiverId } = data;
     const socketId = _userOnlines.get(receiverId);
     socket.to(socketId).emit("getFriendResponse", {
       senderId,
-      msg: `${senderId} denied you`
+      msg: `${senderId} denied you`,
     });
-  })
+  });
+
+  socket.on("request_video_call", (data) => {
+    console.log("step 1");
+    const { senderId, receiverId, sender_name, receiver_name } = data;
+    //  if (!(_userCall.get(senderId) && _userCall.get(receiverId))) {
+    const socketId = _userOnlines.get(receiverId);
+    socket.to(socketId).emit("request_video_call", {
+      senderId: senderId,
+      sender_name: sender_name,
+      receiver_name: receiver_name,
+      receiverId: receiverId,
+    });
+    console.log("step 2");
+    socket.on("callUser", (signal) => {
+      console.log("step 3");
+      socket.to(socketId).emit("callUser", {
+        signal: signal,
+        senderId: senderId,
+        sender_name: sender_name,
+        receiver_name: receiver_name,
+        receiverId: receiverId,
+      });
+      console.log("step 4");
+    });
+    //    }
+  });
+
+  socket.on("accept_video_call", (data) => {
+    console.log("step 5");
+    const { senderId, receiverId, sender_name, receiver_name } = data;
+    const socketId = _userOnlines.get(receiverId);
+    socket.to(socketId).emit("connect_video_call");
+    console.log("step 6");
+    socket.on("answerCall", (signal) => {
+      console.log("step 7");
+      socket.to(socketId).emit("callAccepted", signal);
+    });
+  });
 
   // when disconnect
-  socket.on("disconnect", () => {
-    console.log("a user disconnected!");
-    console.log(socket.id)
-    removeUser(socket.id);
+
+  socket.on("disconnect", (socket) => {
+    console.log("a user " + socket.id + " disconnected!");
+
     io.emit("getUsers", _userOnlines);
   });
 });
