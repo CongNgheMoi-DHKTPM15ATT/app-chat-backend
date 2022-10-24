@@ -42,9 +42,12 @@ io.on("connection", (socket) => {
   socket.on("addUser", (data) => {
     console.log("haha");
     const { senderId } = data;
-    addUser(senderId, socket.id);
-    console.log(senderId);
-    console.log(_userOnlines.get(senderId));
+    if (!_userOnlines.get(senderId)) {
+      addUser(senderId, socket.id);
+      console.log(senderId);
+      console.log(_userOnlines.get(senderId));
+    }
+
     io.emit("getUsers", senderId);
   });
 
@@ -53,21 +56,11 @@ io.on("connection", (socket) => {
     console.log(data);
     const socketId = _userOnlines.get(receiverId);
     socket.emit("load-conver");
-    socket.to(socketId).emit("getMessage", {
+    socket.in(socketId).emit("getMessage", {
       senderId,
       text,
       nick_name,
       receiverId,
-    });
-  });
-
-  socket.on("sendFiles", (data) => {
-    const { senderId, receiverId, files } = data;
-    console.log("files: " + JSON.parse(files));
-    const socketId = _userOnlines.get(receiverId);
-    socket.emit("load-conver");
-    socket.to(socketId).emit("getFiles", {
-      files
     });
   });
 
@@ -101,6 +94,7 @@ io.on("connection", (socket) => {
   // when disconnect
   socket.on("disconnect", () => {
     console.log("a user disconnected!");
+    console.log(socket.id)
     removeUser(socket.id);
     io.emit("getUsers", _userOnlines);
   });

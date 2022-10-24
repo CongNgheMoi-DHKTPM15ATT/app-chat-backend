@@ -74,6 +74,9 @@ const messageController = {
       next(ex);
     }
   }),
+  recovery: asyncHandler((req, res) => {
+
+  }),
 };
 
 module.exports = messageController;
