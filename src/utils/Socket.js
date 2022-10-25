@@ -33,12 +33,12 @@ io.on("connection", (socket) => {
   socket.on("addUser", (data) => {
     const { senderId } = data;
     addUser(senderId, socket);
+    console.log(_userOnlines);
   });
 
   socket.on("send", (data) => {
-    const { senderId, receiverId, text, nick_name } = data;
+    const { senderId, receiverId, text, nick_name, avatar } = data;
     const socketId = _userOnlines.get(receiverId);
-    console.log(socketId)
     if (socketId) {
       socket.emit("load-conver");
       socket.to(socketId).emit("getMessage", {
@@ -46,9 +46,16 @@ io.on("connection", (socket) => {
         text,
         nick_name,
         receiverId,
+        avatar,
+      });
+      socket.to(_userOnlines.get(senderId)).emit("getMessage", {
+        senderId,
+        text,
+        nick_name,
+        receiverId,
+        avatar,
       });
     }
-
   });
 
   socket.on("sendFiles", (data) => {
@@ -74,7 +81,7 @@ io.on("connection", (socket) => {
     const socketId = _userOnlines.get(receiverId);
     socket.to(socketId).emit("getFriendResponse", {
       senderId,
-      msg: `${ senderId } accept you`,
+      msg: `${senderId} accept you`,
     });
   });
 
@@ -83,13 +90,13 @@ io.on("connection", (socket) => {
     const socketId = _userOnlines.get(receiverId);
     socket.to(socketId).emit("getFriendResponse", {
       senderId,
-      msg: `${ senderId } denied you`,
+      msg: `${senderId} denied you`,
     });
   });
 
   socket.on("callUser", (data) => {
     const { senderId, receiverId, sender_name, receiver_name, signalData } =
-    data;
+      data;
     const socketId = _userOnlines.get(receiverId);
     console.log("step 1");
     io.to(socketId).emit("request_video_call", {
@@ -115,7 +122,6 @@ io.on("connection", (socket) => {
       io.to(socketId).emit("callAccepted", data.signal);
     });
   });
-
 
   // when disconnect
   socket.on("disconnect", (socket) => {
