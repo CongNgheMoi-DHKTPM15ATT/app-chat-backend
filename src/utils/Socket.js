@@ -38,13 +38,17 @@ io.on("connection", (socket) => {
   socket.on("send", (data) => {
     const { senderId, receiverId, text, nick_name } = data;
     const socketId = _userOnlines.get(receiverId);
-    socket.emit("load-conver");
-    socket.to(socketId).emit("getMessage", {
-      senderId,
-      text,
-      nick_name,
-      receiverId,
-    });
+    console.log(socketId)
+    if (socketId) {
+      socket.emit("load-conver");
+      socket.to(socketId).emit("getMessage", {
+        senderId,
+        text,
+        nick_name,
+        receiverId,
+      });
+    }
+
   });
 
   socket.on("sendFiles", (data) => {

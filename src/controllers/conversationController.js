@@ -19,9 +19,6 @@ const conversationController = {
   getAllByUser: asyncHandler(async (req, res, next) => {
     try {
       const { user_id } = req.body;
-      console.log("user id: " + user_id);
-
-
       const conversations_document = await Conversation.find({ "members.user_id": user_id }, {})
         .populate({
           path: "last_message",
@@ -35,13 +32,6 @@ const conversationController = {
       conversations_document.forEach(async (conversation) => {
         if (!conversation.is_room) {
           if (conversation.members.length === 2) {
-            console.log(
-              "user chat: " +
-
-              conversation.members.length +
-              " " +
-              conversation._id
-            );
             let receiver_document =
               conversation.members[0].user_id._id == user_id ?
               conversation.members[1] :
@@ -70,26 +60,11 @@ const conversationController = {
 
               });
             }
-          } else if (conversation.members.length === 1) {
-            console.log(
-              "private chat: " +
-
-              conversation.members.length +
-              " " +
-              conversation._id
-            );
+          } else if (conversation.members.length === 1) { //private chat
             // conversations_document.splice(i, 1);
             // i--;
           }
-        } else {
-          console.log(
-            "group chat: " +
-
-            conversation.members.length +
-            " " +
-            conversation._id
-
-          );
+        } else { //group chat
           // conversations_document.splice(i, 1);
           // i--;
         }
