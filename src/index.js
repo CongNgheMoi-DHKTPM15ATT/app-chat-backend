@@ -119,7 +119,7 @@ app.use((error, req, res, next) => {
   }
 });
 
-server.listen(process.env.PORT, () => {
+server.listen(process.env.PORT || 3068, () => {
   console.log(`Express running => PORT ${server.address().port}`);
   connectDatabase();
 });
