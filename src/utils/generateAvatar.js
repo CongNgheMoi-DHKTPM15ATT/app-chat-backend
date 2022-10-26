@@ -9,7 +9,7 @@ exports.generateAvatar = function(user_name, foregroundColor, backgroundColor) {
   context.fillRect(0, 0, canvas.width, canvas.height);
 
   // Draw text
-  context.font = "bold 100px Assistant";
+  context.font = "bold 100px";
   context.fillStyle = foregroundColor;
   context.textAlign = "center";
   context.textBaseline = "middle";
