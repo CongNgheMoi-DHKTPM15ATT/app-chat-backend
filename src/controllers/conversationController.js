@@ -5,6 +5,7 @@ const Message = require("./../models/Message.js");
 const User = require("./../models/User.js");
 const GroupChat = require("./../models/GroupChat.js")
 const { generateAvatar } = require('./../utils/generateAvatar');
+const mongoose = require('mongoose');
 
 async function getUsers(user_ids) {
   const users = [];
@@ -19,54 +20,72 @@ const conversationController = {
   getAllByUser: asyncHandler(async (req, res, next) => {
     try {
       const { user_id } = req.body;
-      const conversations_document = await Conversation.find({ "members.user_id": user_id }, {})
-        .populate({
-          path: "last_message",
-        })
-        .populate({ path: "members.user_id" })
-        .sort({ updatedAt: "desc" });
+      const conversations_document = await Conversation.aggregate([
+        { $match: { "members.user_id": mongoose.Types.ObjectId(user_id) } },
+        {
+          $project: {
+            members: {
+              $filter: {
+                input: "$members",
+                as: "member",
+                cond: { $ne: ["$$member.user_id", mongoose.Types.ObjectId(user_id)] },
+              },
+            },
+            receiver: 1,
+            is_group: 1,
+            last_message: 1,
+            seen_last_message: 1
+          },
+        },
+        { $sort: { updatedAt: -1 } }
+      ])
+      const conversations_document_populate = await Conversation.populate(conversations_document, [
+        { path: "last_message" },
+        { path: "members.user_id" },
+        { path: "receiver" }
+      ])
 
       const conversations = [];
       let receiver;
 
-      conversations_document.forEach(async (conversation) => {
-        if (!conversation.is_room) {
-          if (conversation.members.length === 2) {
-            let receiver_document =
-              conversation.members[0].user_id._id == user_id ?
-              conversation.members[1] :
-              conversation.members[0];
-            let user_document =
-              conversation.members[0].user_id._id == user_id ?
-              conversation.members[0].nick_name :
-              conversation.members[1].nick_name;
+      conversations_document_populate.forEach(async (conversation) => {
 
-            // var user = await User.findById({ _id: receiver_document._id })
-            // receiver = {
-            //   ...receiver_document,
-            //   // "avatar": user.avatar
-            // }
-            // conversation.set('receiver', await User.findById({ _id: user_temp_id }));
-            // receiver.set('avatar', user.avatar || 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/2048px-User-avatar.svg.png')
+        if (!conversation.is_group) {
+          if (conversation.members.length === 1) { //user to user
 
             if (!(conversation.last_message === undefined)) {
               conversations.push({
                 ...new ConversationResponse(conversation).custom(),
                 receiver: {
-                  _id: receiver_document.user_id._id,
-                  nick_name: receiver_document.nick_name,
-                  avatar: receiver_document.user_id.avatar || generateAvatar(receiver_document.user_id.user_name, "white", "#009578"),
+                  _id: conversation.members[0].user_id._id,
+                  nick_name: conversation.members[0].nick_name || conversation.members[0].user_id.user_name,
+                  avatar: conversation.members[0].user_id.avatar || generateAvatar(conversation.members[0].user_id.user_name, "white", "#009578"),
                 },
-
               });
             }
-          } else if (conversation.members.length === 1) { //private chat
+          } else if (conversation.members.length === 0) { //private chat
             // conversations_document.splice(i, 1);
             // i--;
           }
         } else { //group chat
-          // conversations_document.splice(i, 1);
-          // i--;
+          const members = [];
+          for (var i = 0; i < conversation.members.length; i++) {
+            members.push({
+              _id: conversation.members[0].user_id._id,
+              nick_name: conversation.members[0].nick_name || conversation.members[0].user_id.user_name,
+              avatar: conversation.members[0].user_id.avatar || generateAvatar(conversation.members[0].user_id.user_name, "white", "#009578"),
+            })
+          }
+
+          conversations.push({
+            ...new ConversationResponse(conversation).custom(),
+            receiver: {
+              _id: conversation.receiver._id,
+              group_name: conversation.receiver.name,
+              avatar: conversation.receiver.avatar,
+              members
+            },
+          });
         }
       });
 

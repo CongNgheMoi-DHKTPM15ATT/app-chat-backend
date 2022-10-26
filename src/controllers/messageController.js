@@ -7,6 +7,12 @@ const { ObjectId } = require("mongoose");
 const { generateAvatar } = require('./../utils/generateAvatar');
 
 const messageController = {
+  getAllByContentType: asyncHandler(async (req, res) => {
+    const { conversation_id, content_type } = req.body;
+    const messages_document = await Message.find({ conversation: conversation_id, content_type: content_type })
+    console.log(messages_document)
+    return res.json(messages_document)
+  }),
   getMessageByConversation: asyncHandler(async (req, res, next) => {
     const { conversation_id } = req.body;
     console.log("conver: " + conversation_id);

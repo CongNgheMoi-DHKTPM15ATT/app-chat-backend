@@ -12,6 +12,7 @@ const authRoute = require('./routes/authRoute');
 const userRoute = require('./routes/userRoute');
 const messageRoute = require('./routes/messageRoute');
 const conversationRoute = require('./routes/conversationRoute');
+const roomChatRoute = require('./routes/roomChatRoute');
 
 const verifyToken = require('./middlewares/auth');
 const cors = require('cors');
@@ -94,6 +95,7 @@ app.use('/api/auth', authRoute);
 app.use('/api/user', userRoute);
 app.use('/api/messages', messageRoute);
 app.use('/api/conversation', conversationRoute);
+app.use('/api/room', roomChatRoute);
 
 app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(specs));
 

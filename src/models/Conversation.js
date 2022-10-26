@@ -9,7 +9,7 @@ const ConversationSchema = new mongoose.Schema({
       _id: false
     }]
   },
-  receiver: { type: Object },
+  receiver: { type: mongoose.Schema.Types.ObjectId, ref: "GroupChat" },
   is_group: { type: Boolean, default: false },
   last_message: { type: mongoose.Schema.Types.ObjectId, ref: "Message" },
   seen_last_messages: { type: Boolean, require: true, default: false }

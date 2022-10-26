@@ -6,7 +6,7 @@ module.exports = class UserRespone {
   }
 
   custom() {
-    return {
+    return this.user ? {
       "_id": this.user._id,
       "user_name": this.user.user_name,
       "birth_day": this.user.birth_day,
@@ -15,10 +15,10 @@ module.exports = class UserRespone {
       "avatar": this.user.avatar || generateAvatar(this.user.user_name, "white", "#009578"),
       "createdAt": this.user.createdAt,
       "updatedAt": this.user.updatedAt,
-    }
+    } : {}
   }
   customWithoutFriends() {
-    return {
+    return this.user ? {
       "_id": this.user._id,
       "user_name": this.user.user_name,
       "birth_day": this.user.birth_day,
@@ -26,6 +26,6 @@ module.exports = class UserRespone {
       "avatar": this.user.avatar || generateAvatar(this.user.user_name, "white", "#009578"),
       "createdAt": this.user.createdAt,
       "updatedAt": this.user.updatedAt,
-    }
+    } : {}
   }
 }
