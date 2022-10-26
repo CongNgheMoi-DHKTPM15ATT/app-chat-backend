@@ -98,7 +98,7 @@ io.on("connection", (socket) => {
     const { senderId, receiverId, sender_name, receiver_name, signalData } =
       data;
     const socketId = _userOnlines.get(receiverId);
-    console.log("step 1");
+    console.log(signalData);
     io.to(socketId).emit("request_video_call", {
       senderId: senderId,
       sender_name: sender_name,
