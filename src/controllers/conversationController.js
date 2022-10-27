@@ -120,10 +120,10 @@ const conversationController = {
     const members = [];
 
     users.forEach((user) => {
-      // if (members.find(e => { return e.user_id !== mongoose.Types.ObjectId(user._id) })) {
-      members.push({ user_id: user._id, nick_name: user.user_name });
-      // console.log(members)
-      // }
+      if (members.length === 0 || members.filter(function(e) { return e.user_id == user_id; }).length == 0) {
+        members.push({ user_id: user._id, nick_name: user.user_name });
+        // console.log(members)
+      }
     });
     let groupChat = null;
     if (members.length > 2) {
