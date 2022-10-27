@@ -3,7 +3,6 @@ const { createCanvas } = require("canvas");
 exports.generateAvatar = function(user_name, foregroundColor, backgroundColor) {
   const canvas = createCanvas(200, 200)
   const context = canvas.getContext("2d");
-
   // Draw background
   context.fillStyle = backgroundColor;
   context.fillRect(0, 0, canvas.width, canvas.height);
