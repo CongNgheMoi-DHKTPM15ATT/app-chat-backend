@@ -103,17 +103,6 @@ const conversationController = {
     users.forEach((user) => {
       members.push({ user_id: user._id, nick_name: user.user_name });
     });
-    let groupChat = null;
-    if (members.length > 2) {
-      const nameGroupChat = `${members[0].nick_name}, ${members[1].nick_name}, ${members[2].nick_name}`
-      groupChat = await GroupChat.create({
-        name: members.length > 3 ? `${nameGroupChat},...` : nameGroupChat,
-        avatar: generateAvatar("Group", "white", "#FFCC66")
-      })
-      console.log(groupChat)
-    }
-
-    console.log(groupChat)
 
     conversation = await new Conversation({
       members: members,
@@ -123,6 +112,38 @@ const conversationController = {
 
     res.status(200).json(conversation);
   }),
+  createGroup: asyncHandler(async (req, res) => {
+    const { user_id, group_name } = req.body;
+
+    const users = await getUsers(user_id);
+
+    const members = [];
+
+    users.forEach((user) => {
+      // if (members.find(e => { return e.user_id !== mongoose.Types.ObjectId(user._id) })) {
+      members.push({ user_id: user._id, nick_name: user.user_name });
+      // console.log(members)
+      // }
+    });
+    let groupChat = null;
+    if (members.length > 2) {
+      const nameGroupChat = `${members[0].nick_name}, ${members[1].nick_name}, ${members[2].nick_name}`
+      groupChat = await GroupChat.create({
+        name: group_name || (members.length > 3 ? `${nameGroupChat},...` : nameGroupChat),
+        avatar: generateAvatar("Group", "white", "#FFCC66")
+      })
+    } else {
+      res.status(400).json({ "msg": "group must have 3 members" });
+    }
+
+    conversation = await new Conversation({
+      members: members,
+      is_group: members.length === 2 ? false : true,
+      receiver: groupChat || undefined,
+    }).save();
+
+    res.status(200).json(conversation);
+  })
 };
 
 module.exports = conversationController;

@@ -117,4 +117,6 @@ conversationRoute.post('', conversationController.getAllByUser);
  */
 conversationRoute.post('/create', conversationController.create);
 
+conversationRoute.post('/create-group', conversationController.createGroup);
+
 module.exports = conversationRoute;
