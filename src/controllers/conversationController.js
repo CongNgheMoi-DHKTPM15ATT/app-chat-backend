@@ -122,14 +122,13 @@ const conversationController = {
     users.forEach((user) => {
       if (members.length === 0 || members.filter(function(e) { return e.user_id == user_id; }).length == 0) {
         members.push({ user_id: user._id, nick_name: user.user_name });
-        // console.log(members)
       }
     });
     let groupChat = null;
     if (members.length > 2) {
       const nameGroupChat = `${members[0].nick_name}, ${members[1].nick_name}, ${members[2].nick_name}`
       groupChat = await GroupChat.create({
-        name: group_name || (members.length > 3 ? `${nameGroupChat},...` : nameGroupChat),
+        nick_name: group_name || (members.length > 3 ? `${nameGroupChat},...` : nameGroupChat),
         avatar: generateAvatar("Group", "white", "#FFCC66")
       })
     } else {
