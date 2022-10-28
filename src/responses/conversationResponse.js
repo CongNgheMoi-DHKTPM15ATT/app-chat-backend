@@ -3,7 +3,6 @@ module.exports = class ConversationResponse {
     this.conversation = conversation
   }
   custom() {
-    console.log(this.conversation.createAt)
     return {
       _id: this.conversation._id,
       is_group: this.conversation.is_group,
