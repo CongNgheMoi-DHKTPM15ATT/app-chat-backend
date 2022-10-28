@@ -47,7 +47,7 @@ const conversationController = {
 
       const conversations = [];
       let receiver;
-
+      console.log(conversations_document_populate[5].members)
       conversations_document_populate.forEach(async (conversation) => {
 
         if (!conversation.is_group) {
@@ -70,12 +70,15 @@ const conversationController = {
         } else { //group chat
           const members = [];
           for (var i = 0; i < conversation.members.length; i++) {
+
             members.push({
-              _id: conversation.members[0].user_id._id,
-              nick_name: conversation.members[0].nick_name || conversation.members[0].user_id.user_name,
-              avatar: conversation.members[0].user_id.avatar || generateAvatar(conversation.members[0].user_id.user_name, "white", "#009578"),
+              _id: conversation.members[i].user_id._id,
+              nick_name: conversation.members[i].nick_name || conversation.members[0].user_id.user_name,
+              avatar: conversation.members[i].user_id.avatar || generateAvatar(conversation.members[0].user_id.user_name, "white", "#009578"),
             })
           }
+
+          console.log(members)
 
           conversations.push({
             ...new ConversationResponse(conversation).custom(),
