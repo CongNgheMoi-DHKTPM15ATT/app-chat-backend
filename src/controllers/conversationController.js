@@ -81,7 +81,7 @@ const conversationController = {
             ...new ConversationResponse(conversation).custom(),
             receiver: {
               _id: conversation.receiver._id,
-              group_name: conversation.receiver.name,
+              nick_name: conversation.receiver.nick_name,
               avatar: conversation.receiver.avatar,
               members
             },
