@@ -73,8 +73,8 @@ const conversationController = {
 
             members.push({
               _id: conversation.members[i].user_id._id,
-              nick_name: conversation.members[i].nick_name || conversation.members[0].user_id.user_name,
-              avatar: conversation.members[i].user_id.avatar || generateAvatar(conversation.members[0].user_id.user_name, "white", "#009578"),
+              nick_name: conversation.members[i].nick_name || conversation.members[i].user_id.user_name,
+              avatar: conversation.members[i].user_id.avatar || generateAvatar(conversation.members[i].user_id.user_name, "white", "#009578"),
             })
           }
 
