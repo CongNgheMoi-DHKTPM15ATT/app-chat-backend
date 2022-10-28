@@ -47,9 +47,8 @@ const conversationController = {
 
       const conversations = [];
       let receiver;
-      console.log(conversations_document_populate[5].members)
       conversations_document_populate.forEach(async (conversation) => {
-
+        console.log(conversation._id)
         if (!conversation.is_group) {
           if (conversation.members.length === 1) { //user to user
 
@@ -68,6 +67,7 @@ const conversationController = {
             // i--;
           }
         } else { //group chat
+
           const members = [];
           for (var i = 0; i < conversation.members.length; i++) {
 
@@ -77,14 +77,12 @@ const conversationController = {
               avatar: conversation.members[i].user_id.avatar || generateAvatar(conversation.members[i].user_id.user_name, "white", "#009578"),
             })
           }
-
-          console.log(members)
-
+          const nameGroupChat = `${members[0].nick_name.split(' ').slice(-1).join(' ').charAt(0).toUpperCase()}, ${members[1].nick_name..split(' ').slice(-1).join(' ').charAt(0).toUpperCase()},...`
           conversations.push({
             ...new ConversationResponse(conversation).custom(),
             receiver: {
               _id: conversation.receiver._id,
-              nick_name: conversation.receiver.nick_name,
+              nick_name: conversation.receiver.nick_name || nameGroupChat,
               avatar: conversation.receiver.avatar,
               members
             },
@@ -143,6 +141,7 @@ const conversationController = {
       is_group: members.length === 2 ? false : true,
       receiver: groupChat || undefined,
     }).save();
+    console.log(conversation)
 
     res.status(200).json(conversation);
   })
