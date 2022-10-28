@@ -34,7 +34,9 @@ const conversationController = {
             receiver: 1,
             is_group: 1,
             last_message: 1,
-            seen_last_message: 1
+            seen_last_message: 1,
+            createdAt: 1,
+            updatedAt: 1
           },
         },
         { $sort: { updatedAt: -1 } }
@@ -77,7 +79,21 @@ const conversationController = {
               avatar: conversation.members[i].user_id.avatar || generateAvatar(conversation.members[i].user_id.user_name, "white", "#009578"),
             })
           }
-          const nameGroupChat = `${members[0].nick_name.split(' ').slice(-1).join(' ').charAt(0).toUpperCase()}, ${members[1].nick_name..split(' ').slice(-1).join(' ').charAt(0).toUpperCase()},...`
+
+          if (!conversation.last_message) {
+            const message = await new Message({
+              sender: conversation.members[i],
+              content: "xin chào",
+              content_type: "text",
+              conversation: conversation._id,
+            }).save();
+            conversation.last_message = message;
+          }
+
+          // console.log(conversation.createdAt)
+
+          const nameGroupChat = `${members[0].nick_name.split(' ').slice(-1).join(' ')}, ${members[1].nick_name.split(' ').slice(-1).join(' ')},...`
+
           conversations.push({
             ...new ConversationResponse(conversation).custom(),
             receiver: {
@@ -89,6 +105,7 @@ const conversationController = {
           });
         }
       });
+      console.log(conversations)
 
       return res.status(200).json({ conversations });
     } catch (err) {
