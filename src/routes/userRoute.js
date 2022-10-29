@@ -206,7 +206,7 @@ userRoute.post('/confirm-friend-request', userController.confirmFriendRequest);
 
 /**
  *  @swagger
- *  /user/search:
+ *  /user/get-friends-pending:
  *    post:
  *      summary: lọc danh sách user theo status
  *      tags: [User]
@@ -243,9 +243,10 @@ userRoute.post('/confirm-friend-request', userController.confirmFriendRequest);
  */
 
 userRoute.post('/get-friends-pending', userController.getFriendsPending);
+userRoute.post('/remove-friend', userController.removeFriend);
 userRoute.post('/block-friend', userController.blockFriend);
 userRoute.post('/cancel-request-pending', userController.cancelRequestPending);
-// userRoute.post('/remove-friend', userController.removeFriend);
+
 
 userRoute.post('/all', userController.getAll);
 userRoute.post('/id', userController.getById);
