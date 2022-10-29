@@ -133,6 +133,15 @@ const conversationController = {
 
     res.status(200).json(conversation);
   }),
+  getConversationIsGroup: asyncHandler(async (req, res) => {
+    const { user_id } = req.body;
+
+    conversations_document = await Conversation.find({ "members.user_id": mongoose.Types.ObjectId(user_id), is_group: "true" });
+
+    console.log(conversations_document);
+
+    return res.json({ conversations_document })
+  }),
   createGroup: asyncHandler(async (req, res) => {
     const { user_id, group_name } = req.body;
 
