@@ -244,10 +244,11 @@ userRoute.post('/confirm-friend-request', userController.confirmFriendRequest);
 
 userRoute.post('/get-friends-pending', userController.getFriendsPending);
 userRoute.post('/block-friend', userController.blockFriend);
-userRoute.post('/cancel-request-pending', userController.cancelRequestPending)
+userRoute.post('/cancel-request-pending', userController.cancelRequestPending);
+// userRoute.post('/remove-friend', userController.removeFriend);
 
-userRoute.post('/all', userController.getAll)
-userRoute.post('/id', userController.getById)
-userRoute.post('/update', userController.update)
+userRoute.post('/all', userController.getAll);
+userRoute.post('/id', userController.getById);
+userRoute.post('/update', userController.update);
 
 module.exports = userRoute;

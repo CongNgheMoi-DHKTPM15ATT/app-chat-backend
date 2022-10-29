@@ -1,4 +1,3 @@
-
 const asyncHandler = require('express-async-handler');
 const User = require('./../models/User.js');
 const Conversation = require('./../models/Conversation.js')
@@ -53,19 +52,14 @@ async function getReceiverInfo(sender_id, receiver) {
 }
 
 async function updateFriend(user_id, receiver_id, status) {
-  const user = await User.update(
-    { _id: mongoose.Types.ObjectId(user_id), "friends.user_id": receiver_id },
-    { $set: { "friends.$.status": status } }
-  );
+  const user = await User.update({ _id: mongoose.Types.ObjectId(user_id), "friends.user_id": receiver_id }, { $set: { "friends.$.status": status } });
   console.log(user);
   return user;
 }
 
 async function removeFriend(user_id, receiver_id) {
-  const user = await User.findOneAndUpdate(
-    { _id: mongoose.Types.ObjectId(user_id) },
-    { $pull: { friends: { user_id: receiver_id } } }
-  );
+  // const user = await User.findOneAndUpdate({ _id: mongoose.Types.ObjectId(user_id) }, { $pull: { friends: { user_id: receiver_id } } });
+  Conversation.find({ 'members.user_id': { $all: [user_id, receiver_id] } })
   console.log(user);
   return user;
 }
@@ -115,8 +109,7 @@ const userController = {
     const { user_id, status } = req.body;
     const users = [];
 
-    const user_document = await User.aggregate([
-      {
+    const user_document = await User.aggregate([{
         $match: {
           _id: mongoose.Types.ObjectId(user_id),
         },

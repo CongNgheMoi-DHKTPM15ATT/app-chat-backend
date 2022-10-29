@@ -121,14 +121,16 @@ const conversationController = {
     const users = await getUsers(user_id);
 
     const members = [];
+
     users.forEach((user) => {
       members.push({ user_id: user._id, nick_name: user.user_name });
     });
 
+    console.log(members)
+
     conversation = await new Conversation({
       members: members,
-      is_group: members.length === 2 ? false : true,
-      receiver: groupChat || undefined,
+      is_group: false,
     }).save();
 
     res.status(200).json(conversation);
