@@ -95,7 +95,7 @@ app.use('/api/auth', authRoute);
 app.use('/api/user', userRoute);
 app.use('/api/messages', messageRoute);
 app.use('/api/conversation', conversationRoute);
-app.use('/api/room', roomChatRoute);
+app.use('/api/group', roomChatRoute);
 
 app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(specs));
 

@@ -1,5 +1,6 @@
 const express = require("express");
 const messageController = require("./../controllers/messageController");
+const Message = require("./../models/Message.js");
 
 const messageRoute = express.Router();
 
@@ -106,8 +107,122 @@ messageRoute.post("/send", messageController.save);
  */
 
 messageRoute.post("", messageController.getMessageByConversation);
+
+messageRoute.post("/send", messageController.save);
+
+/**
+ *  @swagger
+ *  /messages/recover:
+ *    post:
+ *      summary: Thu hồi tin nhắn
+ *      tags: [Message]
+ *      consumes:
+ *        - application/json
+ *      parameters:
+ *        - in: body
+ *          description: truyền _id của message
+ *          schema:
+ *            type: object
+ *            properties:
+ *              _id:
+ *                type: string
+ *                description: id của message
+ *      responses:
+ *        200:
+ *          description: OK
+ *          content:
+ *            schema:
+ *              example: {
+ *                "msg": "Recover message successfully",
+ *                "data": {
+ *                  "_id": "6350176a007e713f9af0e383",
+ *                  "sender": "6350171f007e713f9af0e356",
+ *                  "content": "Tin nhắn đã dược thu hồi",
+ *                  "content_type": "text",
+ *                  "deleted": true,
+ *                  "conversation": "6350175d007e713f9af0e377",
+ *                  "createdAt": "2022-10-19T15:27:38.136Z",
+ *                  "updatedAt": "2022-10-24T04:56:48.972Z",
+ *                }
+ *              }
+ * 
+ */
+
 messageRoute.post("/recover", messageController.recovery);
+
+
+/**
+ *  @swagger
+ *  /messages/content-type:
+ *    post:
+ *      summary: Lấy message theo loại message
+ *      tags: [Message]
+ *      consumes:
+ *        - application/json
+ *      parameters:
+ *        - in: body
+ *          description: truyền vào conversation_id và content_type (image || file || link || system)
+ *          schema:
+ *            type: object
+ *            properties:
+ *              conversation_id:
+ *                type: string
+ *                description: id của conversation
+ *              content_type:
+ *                type: string
+ *                description: content type của message
+ *      responses:
+ *        200:
+ *          description: OK
+ *          content:
+ *            schema:
+ *              example: [
+ *                 {
+ *                   "_id": "6354d074ce999f889cff5ea3",
+ *                   "sender": "63501bac6f230931f6ada8ea",
+ *                   "content": "https://thu-viddeo-public.s3.amazonaws.com/1666502768958-rn_image_picker_lib_temp_d04adcec-dbea-4456-9656-2106d1eb20ae.jpg",
+ *                   "content_type": "image",
+ *                   "deleted": false,
+ *                   "conversation": "63501cf06f230931f6ada94d",
+ *                   "createdAt": "2022-10-23T05:26:12.537Z",
+ *                   "updatedAt": "2022-10-23T05:26:12.537Z",
+ *                   "__v": 0
+ *                 },
+ *                 {
+ *                   "_id": "6354de01884a1d15b8a63919",
+ *                   "sender": "63501bac6f230931f6ada8ea",
+ *                   "content": "afk",
+ *                   "content_type": "image",
+ *                   "deleted": false,
+ *                   "conversation": "63501cf06f230931f6ada94d",
+ *                   "createdAt": "2022-10-23T06:24:01.037Z",
+ *                   "updatedAt": "2022-10-23T06:24:01.037Z",
+ *                   "__v": 0
+ *                 },
+ *               ]
+ * 
+ */
 messageRoute.post("/content-type", messageController.getAllByContentType);
+
+
+
+
+// route outline
+// 
+messageRoute.post("/delete-anything", async (req, res) => {
+
+  //delete by convasation
+
+  // const { conversation_id } = req.body;
+  // console.log(conversation_id)
+  // await Message.deleteMany({ conversation: conversation_id })
+  // return res.json({ "msg": 'delete complie' })
+  // 
+  // delete by have sender 
+  const mess = await Message.remove({ "sender": { "$exists": false } })
+  return res.json({ mess })
+});
+
 
 
 module.exports = messageRoute;

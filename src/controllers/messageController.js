@@ -13,9 +13,11 @@ const messageController = {
     console.log(messages_document)
     return res.json(messages_document)
   }),
+  deleteByConversation: asyncHandler(async (req, res) => {
+
+  }),
   getMessageByConversation: asyncHandler(async (req, res, next) => {
     const { conversation_id } = req.body;
-    console.log("conver: " + conversation_id);
     const messages_document = await Message.find({
         conversation: conversation_id,
       })

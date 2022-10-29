@@ -47,7 +47,7 @@ const userRoute = express.Router();
  *  @swagger
  *  /user/send-friend-request:
  *    post:
- *      summary: send friend request
+ *      summary: gửi yêu cầu kết bạn
  *      tags: [User]
  *      consumes:
  *        - application/json
@@ -83,7 +83,7 @@ userRoute.post('/send-friend-request', userController.sendFriendRequest);
  *  @swagger
  *  /user/confirm-friend-request:
  *    post:
- *      summary: send friend request
+ *      summary: chấp nhận/từ chối yêu cầu kết bn
  *      tags: [User]
  *      consumes:
  *        - application/json
@@ -114,7 +114,7 @@ userRoute.post('/confirm-friend-request', userController.confirmFriendRequest);
  *  @swagger
  *  /user/search:
  *    post:
- *      summary: send friend request
+ *      summary: lọc danh sách user
  *      tags: [User]
  *      consumes:
  *        - application/json
@@ -149,7 +149,99 @@ userRoute.post('/confirm-friend-request', userController.confirmFriendRequest);
  */
 
 userRoute.post('/search', userController.searchUser);
+
+/**
+ *  @swagger
+ *  /user/id:
+ *    post:
+ *      summary: tìm kiếm user bằng _id
+ *      tags: [User]
+ *      consumes:
+ *        - application/json
+ *      parameters:
+ *        - in: body
+ *          description: by user_id, filter
+ *          schema:
+ *            type: object
+ *            properties:
+ *              _id:
+ *                type: string
+ *      responses:
+ *        200:
+ *          description: OK
+ *          content:
+ *            schema:
+ *              example: {
+ *                "_id": "6350171f007e713f9af0e356",
+ *                "user_name": "Nguyễn Thanh Thảo1",
+ *                "birth_day": "2022-10-19T15:26:23.792Z",
+ *                "friends": [
+ *                  {
+ *                    "user_id": "635016ea007e713f9af0e351",
+ *                    "status": "FRIENDED"
+ *                  },
+ *                  {
+ *                    "user_id": "63501f586f230931f6ada994",
+ *                    "status": "FRIENDED"
+ *                  },
+ *                  {
+ *                    "user_id": "63501ad03798ef92e00ef250",
+ *                    "status": "FRIENDED"
+ *                  },
+ *                  {
+ *                    "user_id": "635441c920761d1e0bc698a4",
+ *                    "status": "PENDING"
+ *                  }
+ *                ],
+ *                "phone": "0563880224",
+ *                "avatar": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAYAAACtWK6eAAAABmJLR0QA/wD/AP+gvaeTAAACQklEQVR4nO3awQ3CQBAEwTMiWiIwERCBSdckgPqFfCdRFcF8WvvZbRz7OYCvbrMHwMoEAkEgEAQCQSAQBAJBIBAEAkEgEAQCQSAQBAJBIBAEAkEgEAQCQSAQBAJBIBAEAkEgEAQCQSAQBAJBIBAEAkEgEAQCQSAQBAJBIBAEAkEgEAQCQSAQBAJBIBAEAkEgEAQCQSAQBAJBIBAEAkEgEAQCQSAQBAJBIBAEAkEgEAQCQSAQBAJBIBAEAkEgEAQCQSAQBAJBIBAEAkEgEAQCQSAQBALhPnvAqs7Ha/aES23v5+wJS3JBIAgEgkAgCASCQCAIBIJAIAgEgkAgCASCQCAIBIJAIGzj2M/ZI/7Frz6Efd5exwWBIBAIAoEgEAgCgSAQCAKBIBAIAoEgEAgCgSAQCAKBIBAIAoEgEAgCgSAQCAKBIBAIAoEgEAgCgSAQCAKBIBAIAoEgEAgCgSAQCAKBIBAIAoEgEAgCgSAQCAKBIBAIAoEgEAgCgSAQCAKBIBAIAoEgEAgCgSAQCAKBIBAIAoEgEAgCgSAQCAKBIBAIAoEgEAjbOPZz9ghYlQsCQSAQBAJBIBAEAkEgEAQCQSAQBAJBIBAEAkEgEAQCQSAQBAJBIBAEAkEgEAQCQSAQBAJBIBAEAkEgEAQCQSAQBAJBIBAEAkEgEAQCQSAQBAJBIBAEAkEgEAQCQSAQBAJBIBAEAkEgEAQCQSAQBAJBIBAEAkEgEAQCQSAQBAJBIBAEAkEgEAQCQSAQBAJBIBAEAuEDZIwNtDtcerIAAAAASUVORK5CYII=",
+ *                "createdAt": "2022-10-19T15:26:23.793Z",
+ *                "updatedAt": "2022-10-24T07:34:01.512Z"
+ *              }
+ */
+
 userRoute.post('/id', userController.getById);
+
+userRoute.post('/confirm-friend-request', userController.confirmFriendRequest);
+
+/**
+ *  @swagger
+ *  /user/search:
+ *    post:
+ *      summary: lọc danh sách user theo status
+ *      tags: [User]
+ *      consumes:
+ *        - application/json
+ *      parameters:
+ *        - in: body
+ *          description: truyền vào user_id, status (FRIENDED || PENDING || ACCEPTING || BLOCK)
+ *          schema:
+ *            type: object
+ *            properties:
+ *              user_id:
+ *                type: string
+ *              status:
+ *                type: string
+ *      responses:
+ *        200:
+ *          description: OK
+ *          content:
+ *            schema:
+ *              example: [
+ *                {
+ *                  "_id": "63425fe9468cba4024ddb894",
+ *                  "user_name": "nguyenhainam_02",
+ *                  "birth_day": "2022-10-09T05:45:13.828Z",
+ *                  "friends": [],
+ *                  "phone": "0123456789",
+ *                  "createdAt": "2022-10-09T05:45:13.835Z",
+ *                  "updatedAt": "2022-10-09T05:45:13.835Z",
+ *                  "nick_name": "nguyenhainam_02",
+ *                  "conversation": "634a847f71044545e3e5408d"
+ *                }
+ *              ] 
+ */
+
 userRoute.post('/get-friends-pending', userController.getFriendsPending);
 userRoute.post('/block-friend', userController.blockFriend);
 userRoute.post('/cancel-request-pending', userController.cancelRequestPending)
