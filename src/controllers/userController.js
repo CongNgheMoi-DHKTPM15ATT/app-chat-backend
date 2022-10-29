@@ -58,8 +58,7 @@ async function updateFriend(user_id, receiver_id, status) {
 }
 
 async function removeFriend(user_id, receiver_id) {
-  // const user = await User.findOneAndUpdate({ _id: mongoose.Types.ObjectId(user_id) }, { $pull: { friends: { user_id: receiver_id } } });
-  Conversation.find({ 'members.user_id': { $all: [user_id, receiver_id] } })
+  const user = await User.findOneAndUpdate({ _id: mongoose.Types.ObjectId(user_id) }, { $pull: { friends: { user_id: receiver_id } } });
   console.log(user);
   return user;
 }
@@ -76,6 +75,21 @@ const userRepository = {
 
 const userController = {
   ...userRepository,
+  removeFriend: asyncHandler(async (req, res) => {
+    const { user_id, receiver_id } = req.body;
+    const conversations_document = await Conversation.findOne({ 'members.user_id': { $all: [user_id, receiver_id] } })
+    if (conversations_document.members.length === 2) {
+      try {
+        const user = await removeFriend(user_id, receiver_id)
+        await conversations_document.remove();
+        return res.json({ success: true })
+      } catch (err) {
+        return res.json({ success: false })
+      }
+
+    }
+
+  }),
   searchUser: asyncHandler(async (req, res) => {
     const { user_id, filter } = req.body;
     const phoneValid = /^0+\d{9}$/;
@@ -162,7 +176,8 @@ const userController = {
     const statusBetweenSenderReceiver = await statusSenderRelativeWithReceiver(user_id, receiver_id);
 
     if (statusBetweenSenderReceiver === friendStatus.pending) {
-      const user = removeFriend(user_id, receiver_id)
+      const user = await removeFriend(user_id, receiver_id)
+      await removeFriend(receiver_id, user_id)
       return res.json({ msg: "Cancel request pending success" })
     } else {
       return res.json({ msg: "you not have pending request" })

@@ -138,11 +138,29 @@ const conversationController = {
   getConversationIsGroup: asyncHandler(async (req, res) => {
     const { user_id } = req.body;
 
-    conversations_document = await Conversation.find({ "members.user_id": mongoose.Types.ObjectId(user_id), is_group: "true" });
+    const conversations = [];
+
+    const conversations_document = await Conversation.find({ "members.user_id": mongoose.Types.ObjectId(user_id), is_group: true })
+      .populate({ path: "receiver" })
+      .populate({ path: "last_message" });
+
+    console.log(conversations_document)
+
+    for (var i = 0; i < conversations_document.length; i++) {
+      conversations.push({
+        ...new ConversationResponse(conversations_document[i]).custom(),
+        receiver: {
+          _id: conversations_document[i].receiver._id,
+          nick_name: conversations_document[i].receiver.nick_name || nameGroupChat,
+          avatar: conversations_document[i].receiver.avatar,
+        },
+      });
+    }
+
 
     console.log(conversations_document);
 
-    return res.json({ conversations_document })
+    return res.json({ conversations })
   }),
   createGroup: asyncHandler(async (req, res) => {
     const { user_id, group_name } = req.body;
