@@ -6,6 +6,7 @@ const User = require("./../models/User.js");
 const GroupChat = require("./../models/GroupChat.js");
 const { generateAvatar } = require("./../utils/generateAvatar");
 const { generateRoomName } = require("./../utils/groupChatService");
+const { statusSenderRelativeWithReceiver, checkIsBlockOrBlocked } = require("./../utils/friendService")
 const mongoose = require("mongoose");
 
 async function getUsers(user_ids) {
@@ -34,16 +35,27 @@ const conversationController = {
                 },
               },
             },
+            sender: {
+              $filter: {
+                input: "$members",
+                as: "member",
+                cond: {
+                  $eq: ["$$member.user_id", mongoose.Types.ObjectId(user_id)],
+                },
+              },
+            },
             receiver: 1,
             is_group: 1,
             last_message: 1,
             seen_last_message: 1,
+            is_blocked: 1,
             createdAt: 1,
             updatedAt: 1,
           },
         },
         { $sort: { updatedAt: -1 } },
       ]);
+
       const conversations_document_populate = await Conversation.populate(
         conversations_document,
         [
@@ -58,24 +70,23 @@ const conversationController = {
       conversations_document_populate.forEach(async (conversation) => {
         if (!conversation.is_group) {
           if (conversation.members.length === 1) {
-            //user to user
 
+            //user to user
             if (!(conversation.last_message === undefined)) {
               conversations.push({
                 ...new ConversationResponse(conversation).custom(),
                 receiver: {
                   _id: conversation.members[0].user_id._id,
-                  nick_name:
-                    conversation.members[0].nick_name ||
+                  nick_name: conversation.members[0].nick_name ||
                     conversation.members[0].user_id.user_name,
-                  avatar:
-                    conversation.members[0].user_id.avatar ||
+                  avatar: conversation.members[0].user_id.avatar ||
                     generateAvatar(
                       conversation.members[0].user_id.user_name,
                       "white",
                       "#009578"
                     ),
                 },
+                is_blocked: conversation.is_blocked || false,
               });
             }
           } else if (conversation.members.length === 0) {
@@ -90,11 +101,9 @@ const conversationController = {
           for (var i = 0; i < conversation.members.length; i++) {
             members.push({
               _id: conversation.members[i].user_id._id,
-              nick_name:
-                conversation.members[i].nick_name ||
+              nick_name: conversation.members[i].nick_name ||
                 conversation.members[i].user_id.user_name,
-              avatar:
-                conversation.members[i].user_id.avatar ||
+              avatar: conversation.members[i].user_id.avatar ||
                 generateAvatar(
                   conversation.members[i].user_id.user_name,
                   "white",
@@ -113,8 +122,7 @@ const conversationController = {
 
             conversation.last_message = message._id;
             const conversations_document = await Conversation.findByIdAndUpdate(
-              conversation._id,
-              { $set: { last_message: message._id } }
+              conversation._id, { $set: { last_message: message._id } }
             );
             conversation.last_message = message;
           }
@@ -129,10 +137,11 @@ const conversationController = {
               avatar: conversation.receiver.avatar,
               members,
             },
+            nick_name: conversation.sender[0].nick_name
           });
         }
       });
-
+      console.log(conversations)
       return res.status(200).json({ conversations });
     } catch (err) {
       console.log(err);
@@ -188,16 +197,16 @@ const conversationController = {
 
   }),
   createGroup: asyncHandler(async (req, res) => {
-    const { user_id, group_name } = req.body;
+    const { admin_id, user_id, group_name } = req.body;
 
-    const users = await getUsers(user_id);
+    const users = await getUsers([...user_id, admin_id]);
 
     const members = [];
 
     users.forEach((user) => {
       if (
         members.length === 0 ||
-        members.filter(function (e) {
+        members.filter(function(e) {
           return e.user_id == user_id;
         }).length == 0
       ) {
@@ -226,9 +235,8 @@ const conversationController = {
       is_group: members.length === 2 ? false : true,
       receiver: groupChat || undefined,
       last_message: message._id,
+      admin: admin_id
     }).save();
-
-    console.log(conversation._id);
 
     message.conversation = conversation._id;
     message.save();
@@ -236,6 +244,22 @@ const conversationController = {
     console.log(conversation);
 
     res.status(200).json(conversation);
+  }),
+  giveAdmin: asyncHandler(async (req, res) => {
+    const { conversation_id, user_id, admin_id } = req.body;
+    console.log(admin_id)
+
+    const conversations_document = await Conversation.findById(conversation_id);
+    try {
+      if (conversations_document.admin.toString() === admin_id.toString()) {
+        console.log("admin")
+        const conversation = await Conversation.update({ _id: conversation_id }, { $set: { 'admin': mongoose.Types.ObjectId(user_id) } })
+        return res.json({ msg: "gán quyền thành công", success: true })
+      }
+    } catch (err) {
+      console.log(err)
+      return res.json({ msg: "gán quyền thất bại", success: false, err: err })
+    }
   }),
 };
 

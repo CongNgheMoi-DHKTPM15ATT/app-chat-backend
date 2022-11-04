@@ -1,4 +1,5 @@
 const { model } = require('mongoose');
+const UserResponse = require('./../responses/userResponse');
 
 module.exports = class BaseRepository {
   constructor(model) {
@@ -18,12 +19,13 @@ module.exports = class BaseRepository {
 
   async update(req, res) {
     const { _id, data } = req.body
-    console.log(data)
-    const doc = await model(this.model).findByIdAndUpdate(_id, data);
+    await model(this.model).findByIdAndUpdate(_id, data);
+    const doc = await model(this.model).findById(_id);
+    console.log(doc)
     if (doc) {
-      res.json({ msg: 'update complie' })
+      res.json(new UserResponse(doc).custom())
     } else {
-      res.json({ msg: 'update failed' })
+      res.json(doc)
     }
   }
 

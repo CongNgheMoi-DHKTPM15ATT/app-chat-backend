@@ -252,4 +252,5 @@ userRoute.post('/all', userController.getAll);
 userRoute.post('/id', userController.getById);
 userRoute.post('/update', userController.update);
 
+
 module.exports = userRoute;

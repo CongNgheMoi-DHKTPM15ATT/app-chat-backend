@@ -10,13 +10,13 @@ const friendStatus = {
   pending: "PENDING",
   accepting: "ACCEPTING",
   block: "BLOCK",
+  blocked: "BLOCKED"
 };
 
 async function addFriend(user_id, receiver_id, status) {
   const user = await User.findById({ _id: user_id });
   user.friends.push({ user_id: receiver_id, status: status });
   user.save();
-  console.log(user);
   return user;
 }
 
@@ -26,15 +26,23 @@ async function statusSenderRelativeWithReceiver(sender_id, receiver_id) {
   const status = senderRelativeWithReceiver.friends.length !== 0 ? senderRelativeWithReceiver.friends[0].status : null;
   return await status;
 }
+async function checkIsBlockOrBlocked(sender_id, receiver_id) {
+  const statusBetweenSenderReceiver = await statusSenderRelativeWithReceiver(sender_id, receiver_id || receiver_id._id);
+  if (statusBetweenSenderReceiver) {
+    return statusBetweenSenderReceiver !== friendStatus.block && statusBetweenSenderReceiver !== friendStatus.blocked ? false : true
+  } else {
+    return false
+  }
+}
 
 async function getReceiverInfo(sender_id, receiver) {
 
   if (receiver) {
     const conversation = await Conversation.findOne({ members: { $size: 2 }, 'members.user_id': { $all: [mongoose.Types.ObjectId(sender_id), mongoose.Types.ObjectId(receiver._id)] } }, { members: { $elemMatch: { user_id: mongoose.Types.ObjectId(receiver._id) } } })
-
     const statusBetweenSenderReceiver = await statusSenderRelativeWithReceiver(sender_id, receiver._id);
-    if (statusBetweenSenderReceiver !== friendStatus.block) {
-      // console.log("check status" + statusBetweenSenderReceiver)
+    const userIsBlockOrBloked = await checkIsBlockOrBlocked(sender_id, receiver);
+
+    if (!userIsBlockOrBloked) {
       return {
         ...new UserResponse(receiver).customWithoutFriends(),
         nick_name: conversation ? conversation.members[0].nick_name : receiver.user_name,
@@ -42,7 +50,6 @@ async function getReceiverInfo(sender_id, receiver) {
         status: statusBetweenSenderReceiver ? statusBetweenSenderReceiver : null
       }
     } else {
-      console.log("haha")
       return null
     }
   } else {
@@ -53,19 +60,17 @@ async function getReceiverInfo(sender_id, receiver) {
 
 async function updateFriend(user_id, receiver_id, status) {
   const user = await User.update({ _id: mongoose.Types.ObjectId(user_id), "friends.user_id": receiver_id }, { $set: { "friends.$.status": status } });
-  console.log(user);
   return user;
 }
 
 async function removeFriend(user_id, receiver_id) {
   const user = await User.findOneAndUpdate({ _id: mongoose.Types.ObjectId(user_id) }, { $pull: { friends: { user_id: receiver_id } } });
-  console.log(user);
   return user;
 }
 
-const mondel = "User"
+const model = "User"
 
-const baseRepository = new BaseRepository(mondel)
+const baseRepository = new BaseRepository(model)
 
 const userRepository = {
   getAll: asyncHandler(async (req, res) => { await baseRepository.getAll(req, res) }),
@@ -77,11 +82,12 @@ const userController = {
   ...userRepository,
   removeFriend: asyncHandler(async (req, res) => {
     const { user_id, receiver_id } = req.body;
-    const conversations_document = await Conversation.findOne({ 'members.user_id': { $all: [user_id, receiver_id] } })
+    // const conversations_document = await Conversation.findOne({ 'members.user_id': { $all: [user_id, receiver_id] }, "members": { "$size": 2 } })
     if (conversations_document.members.length === 2) {
       try {
         const user = await removeFriend(user_id, receiver_id)
-        await conversations_document.remove();
+        await removeFriend(receiver_id, user_id)
+        // await conversations_document.remove();
         return res.json({ success: true })
       } catch (err) {
         return res.json({ success: false })
@@ -99,7 +105,6 @@ const userController = {
 
       const user_receiver_document = filter.match(phoneValid) ? await User.findOne({ phone: filter }) : await User.find({ _id: { $ne: mongoose.Types.ObjectId(user_id) }, user_name: { $regex: '.*' + filter + '.*' } });
       if (!user_receiver_document.length) {
-        console.log(user_receiver_document)
         if (user_receiver_document._id) {
           users.push(await getReceiverInfo(user_id, user_receiver_document))
 
@@ -109,7 +114,6 @@ const userController = {
       } else {
         for (var i = 0; i < user_receiver_document.length; i++) {
           userInfo = await getReceiverInfo(user_id, user_receiver_document[i])
-          console.log(userInfo)
           if (userInfo != null) {
 
             users.push(userInfo);
@@ -160,7 +164,6 @@ const userController = {
       _id: mongoose.Types.ObjectId(user_id),
       "friends.user_id": receiver_id,
     });
-    console.log(user_document);
 
     if (user_document === null) {
       const user = await addFriend(user_id, receiver_id, friendStatus.pending);
@@ -174,13 +177,14 @@ const userController = {
   cancelRequestPending: asyncHandler(async (req, res) => {
     const { user_id, receiver_id } = req.body;
     const statusBetweenSenderReceiver = await statusSenderRelativeWithReceiver(user_id, receiver_id);
-
     if (statusBetweenSenderReceiver === friendStatus.pending) {
+
       const user = await removeFriend(user_id, receiver_id)
       await removeFriend(receiver_id, user_id)
-      return res.json({ msg: "Cancel request pending success" })
+
+      return res.json({ success: true, msg: "Cancel request pending success" })
     } else {
-      return res.json({ msg: "you not have pending request" })
+      return res.json({ success: false, msg: "You not have pending request" })
     }
 
   }),
@@ -195,8 +199,11 @@ const userController = {
     let user;
     if (user_document === null) {
       const user = await addFriend(user_id, receiver_id, friendStatus.block)
+      await addFriend(receiver_id, user_id, friendStatus.blocked)
     } else {
       const user = await updateFriend(user_id, receiver_id, friendStatus.block)
+      await updateFriend(receiver_id, user_id, friendStatus.blocked)
+      await Conversation.findOneAndUpdate({ 'members.user_id': { $all: [user_id, receiver_id] }, "members": { "$size": 2 } }, { is_blocked: true })
 
     }
     return res.status(200).json({ 'msg': 'block user success' })
@@ -212,8 +219,6 @@ const userController = {
     var user_document_friends = user_document.friends.filter((e) => {
       return e.user_id == receiver_id;
     });
-
-    console.log(user_document_friends[0]);
 
     if (user_document_friends.length === 0) {
       return res.status(400).send("you not have request from this user");
@@ -255,7 +260,6 @@ const userController = {
   getById: asyncHandler(async (req, res) => {
     try {
       const { _id } = req.body;
-      console.log(_id);
       const user_document = await User.findById({ _id });
       if (user_document) {
         return res.status(200).json(new UserResponse(user_document).custom());

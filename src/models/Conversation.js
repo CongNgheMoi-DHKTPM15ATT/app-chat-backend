@@ -12,7 +12,13 @@ const ConversationSchema = new mongoose.Schema({
   receiver: { type: mongoose.Schema.Types.ObjectId, ref: "GroupChat" },
   is_group: { type: Boolean, default: false },
   last_message: { type: mongoose.Schema.Types.ObjectId, ref: "Message" },
-  seen_last_messages: { type: Boolean, require: true, default: false }
+  seen_last_messages: { type: Boolean, require: true, default: false },
+  is_blocked: { type: Boolean },
+  admin: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  isFreeEnter: { type: Boolean, default: false },
+  isFreeKickMem: { type: Boolean, default: false },
+  isFreeEdit: { type: Boolean, default: false },
+  requests: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }]
 }, { timestamps: true })
 
 module.exports = mongoose.model("Conversation", ConversationSchema);

@@ -89,13 +89,15 @@ const messageController = {
   recovery: asyncHandler(async (req, res) => {
     const { _id } = req.body;
 
-    const doc = await Message.findByIdAndUpdate(_id, { deleted: 'true', content: 'Tin nhắn đã dược thu hồi', content_type: 'text' })
-    console.log(doc.deleted)
 
-    if (doc.deleted === true) {
-      return res.json({ 'msg': 'Recover message successfully', data: doc })
+
+    const doc = await Message.findOneAndUpdate({ _id }, { deleted: true, content: 'Tin nhắn đã được thu hồi', content_type: 'text' }, { returnOriginal: false })
+    console.log(doc)
+
+    if (doc) {
+      return res.json({ success: true, 'msg': 'Recover message successfully', data: doc })
     } else {
-      return res.json({ 'msg': 'Recover message Failed' });
+      return res.json({ success: false, 'msg': 'Recover message Failed' });
     }
   }),
 };

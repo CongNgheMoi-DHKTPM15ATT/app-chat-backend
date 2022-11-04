@@ -67,4 +67,6 @@ conversationRoute.post('/add-mems', groupChatController.addMems);
  */
 
 conversationRoute.post('/remove-mem', groupChatController.removeMems);
+conversationRoute.post('/request', groupChatController.requestToGroup);
+conversationRoute.post('/accept', groupChatController.acceptRequest);
 module.exports = conversationRoute;
