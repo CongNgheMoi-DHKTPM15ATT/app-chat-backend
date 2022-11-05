@@ -9,29 +9,69 @@ const model = "GroupChat"
 
 const baseRepository = new BaseRepository(model)
 
-const groupRepository = {
+const setting = {
+  isFreeEnter: "isFreeEnter",
+  isFreeKickMem: "isFreeKickMem",
+  isFreeEdit: "isFreeKickMem",
+}
+
+const conversationRepository = {
   getAll: asyncHandler(async (req, res) => { await baseRepository.getAll(req, res) }),
   findById: asyncHandler(async (req, res) => { await baseRepository.findById(req, res) }),
-  update: asyncHandler(async (req, res) => { await baseRepository.update(req, res) }),
+  update: asyncHandler(async (req, res) => {
+    const { conversation_id, user_control_id, user_id, data } = req.body;
+
+    const conversation = await Conversation.findById(conversation_id);
+
+    const wantPermission = [setting.isFreeKickMem];
+
+    if (checkPermissionGroup(conversation, user_control_id, wantPermission)) {
+      conversation.update({ data });
+    }
+
+  }),
+}
+
+function checkPermissionGroup(conversation, user_control_id, wantPermission) {
+
+  let checkModePermission = false;
+
+  for (var i = 0; i < wantPermission.length; i++) {
+    if (conversation.setting[wantPermission[i]] === true) {
+      checkModePermission = true;
+    } else {
+      checkModePermission = false;
+      break;
+    }
+  }
+  return checkModePermission || conversation.admin.toString() === user_control_id.toString()
 }
 
 const groupChatController = {
-  ...groupRepository,
+  ...conversationRepository,
   addMems: asyncHandler(async (req, res) => {
-    const { conversation_id, admin_id, user_id, } = req.body;
+    const { conversation_id, user_control_id, user_id } = req.body;
 
     try {
       const mems = await getMems(user_id);
       if (!mems) {
         return res.json({ succes: false, msg: "dont find user" })
       }
+      permistionWanted = [setting.isFreeEnter]
       conversations_document = await Conversation.findById(mongoose.Types.ObjectId(conversation_id))
-      if (conversations_document.is_group && conversations_document.admin.toString() === admin_id.toString()) {
-        conversation = await Conversation.updateOne({ _id: mongoose.Types.ObjectId(conversation_id) }, { $addToSet: { members: mems } })
-        return res.json({ success: true, 'msg': 'add mems complie' })
+
+      if (checkPermissionGroup(conversations_document, user_control_id, permistionWanted)) {
+        if (conversations_document.is_group) {
+          conversation = await Conversation.updateOne({ _id: mongoose.Types.ObjectId(conversation_id) }, { $addToSet: { members: mems } })
+          return res.json({ success: true, 'msg': 'Add mems complie' })
+        } else {
+          return res.json({ sucess: false, "msg": "Is not group or this user do not permission" })
+        }
       } else {
-        return res.json({ sucess: false, "msg": "is not group or this user do not permission" })
+        await conversations_document.update({ $addToSet: { requests: mongoose.Types.ObjectId(user_id) } })
+        return res.json({ sucess: true, "msg": "This user added to list request" })
       }
+
     } catch (err) {
       console.log(err);
       return res.json({ success: false, 'msg': 'Something is wrong' })
@@ -41,16 +81,21 @@ const groupChatController = {
 
   }),
   removeMems: asyncHandler(async (req, res) => {
-    const { conversation_id, admin_id, user_id } = req.body;
+    const { conversation_id, user_control_id, user_id } = req.body;
     console.log(conversation_id)
     try {
       const conversations_document = await Conversation.findById(mongoose.Types.ObjectId(conversation_id))
       console.log(conversations_document);
-      if (conversations_document.is_group && conversations_document.admin.toString() === admin_id.toString()) {
-        await conversations_document.update({ $pull: { members: { user_id: user_id } } })
-        return res.json({ 'msg': 'remove complie' })
+      permistionWanted = [setting.isFreeKickMem];
+      if (checkPermissionGroup(conversations_document, user_control_id, permistionWanted) || user_control_id.toString() === user_id.toString()) {
+        if (conversations_document.is_group) {
+          await Conversation.updateOne({ _id: mongoose.Types.ObjectId(conversation_id) }, { $pull: { members: { user_id: user_id } } })
+          return res.json({ 'msg': 'remove complie' })
+        } else {
+          return res.json({ sucess: false, "msg": "is not group or this user do not permission" })
+        }
       } else {
-        return res.json({ sucess: false, "msg": "is not group or this user do not permission" })
+        res.json({ sucess: false, "msg": "you no have permission" })
       }
     } catch (err) {
       console.log(err);
@@ -61,16 +106,24 @@ const groupChatController = {
 
   }),
   requestToGroup: asyncHandler(async (req, res) => {
-    const { conversation_id, user_id } = req.body;
+    const { conversation_id, user_id, link } = req.body;
 
     conversations_document = await Conversation.findById(conversation_id);
+    const wantPermission = [setting.isFreeEnter]
     try {
+
       if (conversations_document.is_group === true) {
-        await conversations_document.update({ $addToSet: { requests: mongoose.Types.ObjectId(user_id) } })
-        return res.json({ success: true, 'msg': 'you request success' })
+        if (conversation.setting[wantPermission[i]] === true) {
+          conversation = await Conversation.updateOne({ _id: mongoose.Types.ObjectId(conversation_id) }, { $addToSet: { members: mems } })
+          return res.json({ success: true, 'msg': 'Now! you in this group' })
+        } else {
+          await conversations_document.update({ $addToSet: { requests: mongoose.Types.ObjectId(user_id) } })
+          return res.json({ success: true, 'msg': 'you request success' })
+        }
       } else {
         return res.json({ sucess: false, "msg": "is not group", err: err })
       }
+
     } catch (err) {
       console.log(err)
       return res.json({ sucess: false, err: err })
@@ -78,21 +131,26 @@ const groupChatController = {
 
   }),
   acceptRequest: asyncHandler(async (req, res) => {
-    const { conversation_id, user_id, admin_id } = req.body
-    console.log(user_id)
+    const { conversation_id, user_id, user_control_id } = req.body
 
     try {
       const conversations_document = await Conversation.findById(conversation_id);
       const mems = await getMems(user_id);
 
-      if (conversations_document.is_group) {
-
-        await conversations_document.update({ $pull: { requests: { user_id: [user_id] } } })
-        await conversations_document.update({ $addToSet: { members: mems } })
-        return res.json({ success: true, 'msg': 'you accpet success' })
+      const permistionWanted = [setting.isFreeEnter]
+      if (checkPermissionGroup(conversations_document, user_control_id, permistionWanted)) {
+        if (conversations_document.is_group) {
+          await conversations_document.update({ $pull: { requests: { user_id: [user_id] } } })
+          await conversations_document.update({ $addToSet: { members: mems } })
+          return res.json({ success: true, 'msg': 'you accpet success' })
+        } else {
+          return res.json({ sucess: false, "msg": "is not group" })
+        }
       } else {
-        return res.json({ sucess: false, "msg": "is not group" })
+        res.json({ sucess: false, "msg": "you no have permission" })
       }
+
+
     } catch (err) {
       console.log(err)
       return res.json({ sucess: false, "msg": "accept fail" })

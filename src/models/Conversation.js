@@ -15,9 +15,11 @@ const ConversationSchema = new mongoose.Schema({
   seen_last_messages: { type: Boolean, require: true, default: false },
   is_blocked: { type: Boolean },
   admin: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  isFreeEnter: { type: Boolean, default: false },
-  isFreeKickMem: { type: Boolean, default: false },
-  isFreeEdit: { type: Boolean, default: false },
+  setting: {
+    isFreeEnter: { type: Boolean, default: false },
+    isFreeKickMem: { type: Boolean, default: false },
+    isFreeEdit: { type: Boolean, default: false },
+  },
   requests: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }]
 }, { timestamps: true })
 

@@ -3,7 +3,8 @@ const hyperLinkController = require('./../controllers/hyperLinkController');
 
 const hyperLinkRoute = express.Router();
 
-hyperLinkRoute.post('/generate-link', hyperLinkController.register);
+hyperLinkRoute.post('/generate-link', hyperLinkController.generateLink);
+hyperLinkRoute.post('/generate-qr', hyperLinkController.generateQr);
 
 
 

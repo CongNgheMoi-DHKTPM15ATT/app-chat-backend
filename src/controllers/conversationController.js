@@ -7,7 +7,19 @@ const GroupChat = require("./../models/GroupChat.js");
 const { generateAvatar } = require("./../utils/generateAvatar");
 const { generateRoomName } = require("./../utils/groupChatService");
 const { statusSenderRelativeWithReceiver, checkIsBlockOrBlocked } = require("./../utils/friendService")
+const BaseRepository = require('./../repositories/BaseRepository');
+
 const mongoose = require("mongoose");
+const model = "Conversation"
+
+const baseRepository = new BaseRepository(model)
+
+const groupRepository = {
+  getAll: asyncHandler(async (req, res) => { await baseRepository.getAll(req, res) }),
+  findById: asyncHandler(async (req, res) => { await baseRepository.findById(req, res) }),
+  update: asyncHandler(async (req, res) => { await baseRepository.update(req, res) }),
+}
+
 
 async function getUsers(user_ids) {
   const users = [];
@@ -19,6 +31,7 @@ async function getUsers(user_ids) {
 }
 
 const conversationController = {
+  ...groupRepository,
   getAllByUser: asyncHandler(async (req, res, next) => {
     try {
       const { user_id } = req.body;
@@ -190,9 +203,6 @@ const conversationController = {
       });
     }
 
-
-    console.log(conversations_document);
-
     return res.json({ conversations })
 
   }),
@@ -230,7 +240,7 @@ const conversationController = {
       content_type: "notification",
     }).save();
 
-    conversation = await new Conversation({
+    const conversation = await new Conversation({
       members: members,
       is_group: members.length === 2 ? false : true,
       receiver: groupChat || undefined,
@@ -240,8 +250,6 @@ const conversationController = {
 
     message.conversation = conversation._id;
     message.save();
-    console.log(message);
-    console.log(conversation);
 
     res.status(200).json(conversation);
   }),
@@ -258,7 +266,7 @@ const conversationController = {
       }
     } catch (err) {
       console.log(err)
-      return res.json({ msg: "gán quyền thất bại", success: false, err: err })
+      return res.json({ msg: "gán quyền thất bại", success: false })
     }
   }),
 };
