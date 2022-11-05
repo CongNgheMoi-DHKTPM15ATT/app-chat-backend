@@ -23,7 +23,7 @@ const conversationRepository = {
 
     const conversation = await Conversation.findById(conversation_id);
 
-    const wantPermission = [setting.isFreeKickMem];
+    const wantPermission = [setting.isFreeEdit];
 
     if (checkPermissionGroup(conversation, user_control_id, wantPermission)) {
       conversation.update({ data });
