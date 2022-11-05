@@ -108,6 +108,12 @@ const groupChatController = {
   requestToGroup: asyncHandler(async (req, res) => {
     const { conversation_id, user_id, link } = req.body;
 
+    // if (link) {
+    //   conversation_id = link.slice(-24);
+    // }
+
+    // console.log(conversation_id);
+
     conversations_document = await Conversation.findById(conversation_id);
     const wantPermission = [setting.isFreeEnter]
     try {
