@@ -17,14 +17,16 @@ const messageController = {
 
   }),
   getMessageByConversation: asyncHandler(async (req, res, next) => {
-    const { conversation_id } = req.body;
+    const { conversation_id, limit } = req.body;
     const messages_document = await Message.find({
         conversation: conversation_id,
       })
       .populate({
         path: "conversation",
       })
-      .populate("sender");
+      .populate("sender")
+      .sort({ createdAt: -1 })
+      .limit(limit);
 
     const messages = [];
     let sender;
