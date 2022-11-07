@@ -108,19 +108,14 @@ const groupChatController = {
   requestToGroup: asyncHandler(async (req, res) => {
     const { conversation_id, user_id, link } = req.body;
 
-    // if (link) {
-    //   conversation_id = link.slice(-24);
-    // }
-
-    // console.log(conversation_id);
-
     conversations_document = await Conversation.findById(conversation_id);
     const wantPermission = [setting.isFreeEnter]
+    console.log(conversations_document)
     try {
 
       if (conversations_document.is_group === true) {
-        if (conversation.setting[wantPermission[i]] === true) {
-          conversation = await Conversation.updateOne({ _id: mongoose.Types.ObjectId(conversation_id) }, { $addToSet: { members: mems } })
+        if (conversations_document.setting[wantPermission[0]] === true) {
+          await Conversation.updateOne({ _id: mongoose.Types.ObjectId(conversation_id) }, { $addToSet: { members: mems } })
           return res.json({ success: true, 'msg': 'Now! you in this group' })
         } else {
           await conversations_document.update({ $addToSet: { requests: mongoose.Types.ObjectId(user_id) } })

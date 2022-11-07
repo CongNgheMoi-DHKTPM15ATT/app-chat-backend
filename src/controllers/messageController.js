@@ -17,7 +17,7 @@ const messageController = {
 
   }),
   getMessageByConversation: asyncHandler(async (req, res, next) => {
-    const { conversation_id, limit } = req.body;
+    const { conversation_id, limit, offset } = req.body;
     const messages_document = await Message.find({
         conversation: conversation_id,
       })
@@ -26,6 +26,7 @@ const messageController = {
       })
       .populate("sender")
       .sort({ createdAt: -1 })
+      .skip(offset)
       .limit(limit);
 
     const messages = [];
