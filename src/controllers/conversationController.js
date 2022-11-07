@@ -80,7 +80,11 @@ const conversationController = {
 
       const conversations = [];
       let receiver;
+
+      console.log(conversations_document_populate)
+
       conversations_document_populate.forEach(async (conversation) => {
+        console.log(conversation._id)
         if (!conversation.is_group) {
           if (conversation.members.length === 1) {
 
@@ -109,21 +113,20 @@ const conversationController = {
           }
         } else {
           //group chat
-
           const members = [];
-          for (var i = 0; i < conversation.members.length; i++) {
-            members.push({
-              _id: conversation.members[i].user_id._id,
-              nick_name: conversation.members[i].nick_name ||
-                conversation.members[i].user_id.user_name,
-              avatar: conversation.members[i].user_id.avatar ||
-                generateAvatar(
-                  conversation.members[i].user_id.user_name,
-                  "white",
-                  "#009578"
-                ),
-            });
-          }
+          conversation.members.forEach((member) => {
+            // console.log(member.user_id._id);
+            try {
+              members.push({
+                _id: member.user_id._id,
+                nick_name: member.nick_name || member.user_id.user_name,
+                avatar: member.user_id.avatar ||
+                  generateAvatar(member.user_id.user_name, "white", "#009578"),
+              });
+            } catch (e) {
+              console.log(conversation);
+            }
+          });
 
           if (!conversation.hasOwnProperty("last_message")) {
             const message = await new Message({
@@ -154,7 +157,7 @@ const conversationController = {
           });
         }
       });
-      console.log(conversations)
+
       return res.status(200).json({ conversations });
     } catch (err) {
       console.log(err);
@@ -170,8 +173,6 @@ const conversationController = {
     users.forEach((user) => {
       members.push({ user_id: user._id, nick_name: user.user_name });
     });
-
-    console.log(members);
 
     conversation = await new Conversation({
       members: members,
