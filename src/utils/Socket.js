@@ -30,21 +30,55 @@ const addUser = (userId, socket) => {
 io.on("connection", (socket) => {
   global._io = socket;
 
+  socket.on("addGroup", (data) => {
+    const { senderId, groups } = data;
+    groups.map((group) => {
+      addUser(group.receiver._id, socket);
+      console.log(group._id);
+    });
+  });
+
   socket.on("addUser", (data) => {
     const { senderId } = data;
     addUser(senderId, socket);
     console.log(_userOnlines);
   });
 
+  socket.on("loadConver", (sender_id) => {
+    socket.emit("load-conver");
+    socket.to(_userOnlines.get(sender_id)).emit("load-conver");
+  });
+
+  socket.on("load_message", (data) => {
+    const { sender_id, conversation, receiverId } = data;
+    socket.emit("load-conver");
+    socket.to(_userOnlines.get(sender_id)).emit("load-conver");
+    socket.emit("load_message", { conversation });
+    socket
+      .to(_userOnlines.get(sender_id))
+      .emit("load_message", { conversation });
+
+    socket.to(_userOnlines.get(receiverId)).emit("load-conver");
+    socket
+      .to(_userOnlines.get(receiverId))
+      .emit("load_message_receiver", { conversation });
+  });
+
+  socket.on("requestLoadConver", (data) => {
+    const { user } = data;
+    user.map((u) => {
+      const id = _userOnlines.get(u);
+      if (id) socket.to(id).emit("load-conver");
+    });
+  });
+
   socket.on("send", (data) => {
-    const { senderId, receiverId, text, nick_name, avatar, content_type } =
+    const { senderId, receiverId, text, nick_name, avatar, content_type, _id } =
       data;
     const socketId = _userOnlines.get(receiverId);
+    socket.emit("load-conver");
+    socket.to(_userOnlines.get(senderId)).emit("load-conver");
     if (socketId) {
-      /// bug nè m
-      socket.nsp.to(_userOnlines.get(senderId)).emit("load-conver");
-      ///
-
       socket.to(socketId).emit("getMessage", {
         senderId,
         text,
@@ -52,6 +86,7 @@ io.on("connection", (socket) => {
         receiverId,
         avatar,
         content_type,
+        _id,
       });
       socket.to(_userOnlines.get(senderId)).emit("getMessage", {
         senderId,
@@ -60,6 +95,7 @@ io.on("connection", (socket) => {
         receiverId,
         avatar,
         content_type,
+        _id,
       });
     }
   });
