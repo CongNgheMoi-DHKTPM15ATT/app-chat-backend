@@ -32,7 +32,7 @@ const messageController = {
 
       const messages = [];
       let sender;
-
+      console.log(messages_document)
       messages_document.forEach((message) => {
         message.conversation.members.forEach((member) => {
 
@@ -48,9 +48,9 @@ const messageController = {
           }
         });
 
-        console.log(message.content_type)
 
-        if (sender.joinedDate <= message.createdAt || messages_document[0].content_type == 'notification') {
+
+        if (sender.joinedDate <= message.createdAt || messages_document[messages_document.length - 1].content_type == 'notification') {
           messages.push({
             ...new MessageResponse(message).custom(),
             sender: sender,
