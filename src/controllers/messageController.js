@@ -18,41 +18,52 @@ const messageController = {
   }),
   getMessageByConversation: asyncHandler(async (req, res, next) => {
     const { conversation_id, limit, offset } = req.body;
-    const messages_document = await Message.find({
-        conversation: conversation_id,
-      })
-      .populate({
-        path: "conversation",
-      })
-      .populate("sender")
-      .sort({ createdAt: -1 })
-      .skip(offset)
-      .limit(limit);
+    try {
+      const messages_document = await Message.find({
+          conversation: conversation_id,
+        })
+        .populate({
+          path: "conversation",
+        })
+        .populate("sender")
+        .sort({ createdAt: -1 })
+        .skip(offset)
+        .limit(limit);
 
-    const messages = [];
-    let sender;
+      const messages = [];
+      let sender;
 
-    messages_document.forEach((message) => {
-      message.conversation.members.forEach((member) => {
+      messages_document.forEach((message) => {
+        message.conversation.members.forEach((member) => {
 
-        if (member.user_id.toString() === message.sender._id.toString()) {
-          sender = {
-            user_id: member.user_id,
-            nick_name: member.nick_name,
-            avatar: message.sender.avatar || generateAvatar(message.sender.user_name, "white", "#009578")
-          };
-          return;
+          if (member.user_id.toString() === message.sender._id.toString()) {
+
+            sender = {
+              user_id: member.user_id,
+              nick_name: member.nick_name,
+              joinedDate: member.joinedDate || message.conversation.createdAt,
+              avatar: message.sender.avatar || generateAvatar(message.sender.user_name, "white", "#009578")
+            };
+            return;
+          }
+        });
+
+        if (sender.joinedDate <= message.createdAt) {
+          messages.push({
+            ...new MessageResponse(message).custom(),
+            sender: sender,
+          });
         }
+
       });
-      messages.push({
-        ...new MessageResponse(message).custom(),
-        sender: sender,
+
+      return res.json({
+        messages,
       });
-    });
-    messages.reverse();
-    return res.json({
-      messages,
-    });
+    } catch (err) {
+      console.log(err)
+    }
+
   }),
   // getLastMessage: asyncHandler(async (req, res, next) => {
   //   const { senderId, receiverId } = req.query;

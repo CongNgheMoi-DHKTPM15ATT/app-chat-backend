@@ -24,6 +24,8 @@ const conversationRoute = express.Router();
  *                items:
  *                  item:
  *                    type: string
+ *              user_control_id:
+ *                type: string
  *      responses:
  *        200:
  *          description: OK

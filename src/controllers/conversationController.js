@@ -81,10 +81,7 @@ const conversationController = {
       const conversations = [];
       let receiver;
 
-      console.log(conversations_document_populate)
-
       conversations_document_populate.forEach(async (conversation) => {
-        console.log(conversation._id)
         if (!conversation.is_group) {
           if (conversation.members.length === 1) {
 
@@ -124,7 +121,7 @@ const conversationController = {
                   generateAvatar(member.user_id.user_name, "white", "#009578"),
               });
             } catch (e) {
-              console.log(conversation);
+              console.log(conversation._id);
             }
           });
 
@@ -225,14 +222,14 @@ const conversationController = {
       }
     });
     let groupChat = null;
-    if (members.length > 2) {
+    if (members.length > 0) {
       const nameGroupChat = generateRoomName(members);
       groupChat = await GroupChat.create({
         nick_name: group_name || nameGroupChat,
         avatar: generateAvatar("Group", "white", "#FFCC66"),
       });
     } else {
-      res.status(400).json({ msg: "group must have 3 members" });
+      res.status(400).json({ msg: "group must have 1 members" });
     }
 
     const message = await new Message({
@@ -243,10 +240,15 @@ const conversationController = {
 
     const conversation = await new Conversation({
       members: members,
-      is_group: members.length === 2 ? false : true,
+      is_group: true,
       receiver: groupChat || undefined,
       last_message: message._id,
-      admin: admin_id
+      admin: admin_id,
+      setting: {
+        isFreeEnter: false,
+        isFreeKickMem: false,
+        isFreeEdit: false
+      },
     }).save();
 
     message.conversation = conversation._id;

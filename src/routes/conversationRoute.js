@@ -268,4 +268,6 @@ conversationRoute.post('/group', conversationController.getConversationIsGroup);
 
 conversationRoute.post('/give-admin', conversationController.giveAdmin);
 
+conversationRoute.post('/id', conversationController.findById);
+
 module.exports = conversationRoute;

@@ -9,7 +9,8 @@ exports.getMems = async (user_ids) => {
       let user = await User.findById(user_ids[i]);
       users.push({
         user_id: user._id,
-        nick_name: user.user_name
+        nick_name: user.user_name,
+        joinedDate: Date.now
       });
     }
     return users;

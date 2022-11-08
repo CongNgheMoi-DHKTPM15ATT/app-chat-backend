@@ -6,6 +6,7 @@ const ConversationSchema = new mongoose.Schema({
     type: [{
       user_id: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
       nick_name: { type: String },
+      joinedDate: { type: Date },
       _id: false
     }]
   },
@@ -16,10 +17,11 @@ const ConversationSchema = new mongoose.Schema({
   is_blocked: { type: Boolean },
   admin: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   setting: {
-    isFreeEnter: { type: Boolean, default: false },
-    isFreeKickMem: { type: Boolean, default: false },
-    isFreeEdit: { type: Boolean, default: false },
+    isFreeEnter: { type: Boolean },
+    isFreeKickMem: { type: Boolean },
+    isFreeEdit: { type: Boolean },
   },
+  is_secret: { type: Boolean, default: false },
   requests: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }]
 }, { timestamps: true })
 
