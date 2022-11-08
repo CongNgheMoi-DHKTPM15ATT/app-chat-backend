@@ -48,7 +48,7 @@ const messageController = {
           }
         });
 
-        if (sender.joinedDate <= message.createdAt) {
+        if (sender.joinedDate <= message.createdAt || messages_document[0].content_type === 'notification') {
           messages.push({
             ...new MessageResponse(message).custom(),
             sender: sender,
