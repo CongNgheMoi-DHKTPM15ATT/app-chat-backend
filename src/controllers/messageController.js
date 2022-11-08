@@ -26,7 +26,7 @@ const messageController = {
           path: "conversation",
         })
         .populate("sender")
-        .sort({ createdAt: -1 })
+        .sort({ createdAt: 1 })
         .skip(offset)
         .limit(limit);
 
@@ -48,7 +48,9 @@ const messageController = {
           }
         });
 
-        if (sender.joinedDate <= message.createdAt || messages_document[0].content_type === 'notification') {
+        console.log(message.content_type)
+
+        if (sender.joinedDate <= message.createdAt || messages_document[0].content_type == 'notification') {
           messages.push({
             ...new MessageResponse(message).custom(),
             sender: sender,
