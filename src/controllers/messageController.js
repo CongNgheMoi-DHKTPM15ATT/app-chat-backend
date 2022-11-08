@@ -26,7 +26,7 @@ const messageController = {
           path: "conversation",
         })
         .populate("sender")
-        .sort({ createdAt: 1 })
+        .sort({ createdAt: -1 })
         .skip(offset)
         .limit(limit);
 
