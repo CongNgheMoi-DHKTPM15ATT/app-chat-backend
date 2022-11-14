@@ -10,7 +10,7 @@ const messageController = {
   getAllByContentType: asyncHandler(async (req, res) => {
     const { conversation_id, content_type } = req.body;
     const messages_document = await Message.find({
-      conversation_id: conversation_id,
+      conversation: conversation_id,
       content_type: content_type,
     });
     console.log(messages_document);
@@ -19,7 +19,7 @@ const messageController = {
   getAllByContentTypeTop4: asyncHandler(async (req, res) => {
     const { conversation_id, content_type } = req.body;
     const messages_document = await Message.find({
-      conversation_id: conversation_id,
+      conversation: conversation_id,
       content_type: content_type,
     })
       .limit(4)
