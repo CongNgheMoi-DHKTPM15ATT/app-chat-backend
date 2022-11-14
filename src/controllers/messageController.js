@@ -16,6 +16,17 @@ const messageController = {
     console.log(messages_document);
     return res.json(messages_document);
   }),
+  getAllByContentTypeTop4: asyncHandler(async (req, res) => {
+    const { conversation_id, content_type } = req.body;
+    const messages_document = await Message.find({
+      conversation_id: conversation_id,
+      content_type: content_type,
+    })
+      .limit(4)
+      .sort({ createdAt: -1 });
+    console.log(messages_document);
+    return res.json(messages_document);
+  }),
   deleteByConversation: asyncHandler(async (req, res) => {}),
   getMessageByConversation: asyncHandler(async (req, res, next) => {
     const { conversation_id, limit, offset } = req.body;
