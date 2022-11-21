@@ -163,6 +163,7 @@ const conversationController = {
               },
               nick_name: conversation.sender[0].nick_name,
             });
+
           } catch (e) {
             console.log(conversation._id);
           }
