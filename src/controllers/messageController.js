@@ -4,24 +4,25 @@ const MessageResponse = require("./../responses/messageResponse");
 const Conversation = require("./../models/Conversation.js");
 const User = require("./../models/User.js");
 const { ObjectId } = require("mongoose");
-const { generateAvatar } = require('./../utils/generateAvatar');
+const { generateAvatar } = require("./../utils/generateAvatar");
 
 const messageController = {
   getAllByContentType: asyncHandler(async (req, res) => {
     const { conversation_id, content_type } = req.body;
-    const messages_document = await Message.find({ conversation: conversation_id, content_type: content_type })
-    console.log(messages_document)
-    return res.json(messages_document)
+    const messages_document = await Message.find({
+      conversation: conversation_id,
+      content_type: content_type,
+    });
+    console.log(messages_document);
+    return res.json(messages_document);
   }),
-  deleteByConversation: asyncHandler(async (req, res) => {
-
-  }),
+  deleteByConversation: asyncHandler(async (req, res) => {}),
   getMessageByConversation: asyncHandler(async (req, res, next) => {
     const { conversation_id, limit, offset } = req.body;
     try {
       const messages_document = await Message.find({
-          conversation: conversation_id,
-        })
+        conversation: conversation_id,
+      })
         .populate({
           path: "conversation",
         })
@@ -32,40 +33,40 @@ const messageController = {
 
       const messages = [];
       let sender;
-      console.log(messages_document)
+      console.log(messages_document);
       messages_document.forEach((message) => {
         message.conversation.members.forEach((member) => {
-
           if (member.user_id.toString() === message.sender._id.toString()) {
-
             sender = {
               user_id: member.user_id,
               nick_name: member.nick_name,
               joinedDate: member.joinedDate || message.conversation.createdAt,
-              avatar: message.sender.avatar || generateAvatar(message.sender.user_name, "white", "#009578")
+              avatar:
+                message.sender.avatar ||
+                generateAvatar(message.sender.user_name, "white", "#009578"),
             };
             return;
           }
         });
 
-
-
-        if (sender.joinedDate <= message.createdAt || messages_document[messages_document.length - 1].content_type == 'notification') {
+        if (
+          sender.joinedDate <= message.createdAt ||
+          messages_document[messages_document.length - 1].content_type ==
+            "notification"
+        ) {
           messages.push({
             ...new MessageResponse(message).custom(),
             sender: sender,
           });
         }
-
       });
 
       return res.json({
         messages,
       });
     } catch (err) {
-      console.log(err)
+      console.log(err);
     }
-
   }),
   // getLastMessage: asyncHandler(async (req, res, next) => {
   //   const { senderId, receiverId } = req.query;
@@ -86,9 +87,12 @@ const messageController = {
 
       console.log(message);
 
-      const conversation = await Conversation.findByIdAndUpdate({ _id: conversation_id }, {
-        last_message: message._id,
-      });
+      const conversation = await Conversation.findByIdAndUpdate(
+        { _id: conversation_id },
+        {
+          last_message: message._id,
+        }
+      );
 
       if (message)
         return res
@@ -105,15 +109,25 @@ const messageController = {
   recovery: asyncHandler(async (req, res) => {
     const { _id } = req.body;
 
-
-
-    const doc = await Message.findOneAndUpdate({ _id }, { deleted: true, content: 'Tin nhắn đã được thu hồi', content_type: 'text' }, { returnOriginal: false })
-    console.log(doc)
+    const doc = await Message.findOneAndUpdate(
+      { _id },
+      {
+        deleted: true,
+        content: "Tin nhắn đã được thu hồi",
+        content_type: "text",
+      },
+      { returnOriginal: false }
+    );
+    console.log(doc);
 
     if (doc) {
-      return res.json({ success: true, 'msg': 'Recover message successfully', data: doc })
+      return res.json({
+        success: true,
+        msg: "Recover message successfully",
+        data: doc,
+      });
     } else {
-      return res.json({ success: false, 'msg': 'Recover message Failed' });
+      return res.json({ success: false, msg: "Recover message Failed" });
     }
   }),
 };
