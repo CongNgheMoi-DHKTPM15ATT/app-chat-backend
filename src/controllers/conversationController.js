@@ -163,7 +163,6 @@ const conversationController = {
               },
               nick_name: conversation.sender[0].nick_name,
             });
-
           } catch (e) {
             console.log(conversation._id);
           }
@@ -194,32 +193,37 @@ const conversationController = {
     res.status(200).json(conversation);
   }),
   getConversationIsGroup: asyncHandler(async (req, res) => {
-    const { user_id } = req.body;
+    try {
+      const { user_id } = req.body;
+      const conversations = [];
 
-    const conversations = [];
+      const conversations_document = await Conversation.find({
+        "members.user_id": mongoose.Types.ObjectId(user_id),
+        is_group: true,
+      })
+        .populate({ path: "receiver" })
+        .populate({ path: "last_message" });
 
-    const conversations_document = await Conversation.find({
-      "members.user_id": mongoose.Types.ObjectId(user_id),
-      is_group: true,
-    })
-      .populate({ path: "receiver" })
-      .populate({ path: "last_message" });
+      for (var i = 0; i < conversations_document.length; i++) {
+        try {
+          conversations.push({
+            ...new ConversationResponse(conversations_document[i]).custom(),
+            receiver: {
+              _id: conversations_document[i].receiver._id,
+              nick_name:
+                conversations_document[i].receiver.nick_name || nameGroupChat,
+              avatar: conversations_document[i].receiver.avatar,
+            },
+          });
+        } catch (err) {
+          console.log(conversations_document._id);
+        }
+      }
 
-    console.log(conversations_document);
-
-    for (var i = 0; i < conversations_document.length; i++) {
-      conversations.push({
-        ...new ConversationResponse(conversations_document[i]).custom(),
-        receiver: {
-          _id: conversations_document[i].receiver._id,
-          nick_name:
-            conversations_document[i].receiver.nick_name || nameGroupChat,
-          avatar: conversations_document[i].receiver.avatar,
-        },
-      });
+      return res.json({ conversations });
+    } catch (err) {
+      console.log(err);
     }
-
-    return res.json({ conversations });
   }),
   createGroup: asyncHandler(async (req, res) => {
     const { admin_id, user_id, group_name } = req.body;
