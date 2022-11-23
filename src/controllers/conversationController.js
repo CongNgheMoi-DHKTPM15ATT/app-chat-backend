@@ -216,7 +216,8 @@ const conversationController = {
             },
           });
         } catch (err) {
-          console.log(conversations_document._id);
+          // console.log("setting " + conversations_document.setting);
+          // console.log(conversations_document._id);
         }
       }
 

@@ -15,7 +15,6 @@ const messageController = {
     });
     console.log(messages_document);
     return res.json(messages_document);
-
   }),
   getAllByContentTypeTop4: asyncHandler(async (req, res) => {
     const { conversation_id, content_type } = req.body;
@@ -27,7 +26,6 @@ const messageController = {
       .sort({ createdAt: -1 });
     console.log(messages_document);
     return res.json(messages_document);
-
   }),
   deleteByConversation: asyncHandler(async (req, res) => {}),
   getMessageByConversation: asyncHandler(async (req, res, next) => {
@@ -61,16 +59,19 @@ const messageController = {
             return;
           }
         });
-
-        if (
-          sender.joinedDate <= message.createdAt ||
-          messages_document[messages_document.length - 1].content_type ==
-            "notification"
-        ) {
-          messages.push({
-            ...new MessageResponse(message).custom(),
-            sender: sender,
-          });
+        try {
+          if (
+            sender.joinedDate <= message.createdAt ||
+            messages_document[messages_document.length - 1].content_type ==
+              "notification"
+          ) {
+            messages.push({
+              ...new MessageResponse(message).custom(),
+              sender: sender,
+            });
+          }
+        } catch (err) {
+          console.log(err);
         }
       });
 
