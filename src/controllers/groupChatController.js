@@ -56,9 +56,15 @@ const groupChatController = {
   ...conversationRepository,
   addMems: asyncHandler(async (req, res) => {
     const { conversation_id, user_control_id, user_id } = req.body;
-
+    console.log(user_id);
     try {
-      const mems = await getMems(user_id);
+      let mems;
+      if (Array.isArray(user_id)) {
+        mems = await getMems(user_id);
+      } else {
+        mems = await getMems([user_id]);
+      }
+
       if (!mems) {
         return res.json({ succes: false, msg: "dont find user" });
       }
