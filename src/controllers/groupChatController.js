@@ -46,10 +46,7 @@ function checkPermissionGroup(conversation, user_control_id, wantPermission) {
       break;
     }
   }
-  return (
-    checkModePermission ||
-    conversation.admin.toString() === user_control_id.toString()
-  );
+  return checkModePermission || conversation.admin === user_control_id;
 }
 
 const groupChatController = {
@@ -94,7 +91,7 @@ const groupChatController = {
         }
       } else {
         await conversations_document.update({
-          $addToSet: { requests: mongoose.Types.ObjectId(user_id) },
+          $addToSet: { requests: user_id },
         });
         return res.json({
           sucess: true,
@@ -113,7 +110,7 @@ const groupChatController = {
       const conversations_document = await Conversation.findById(
         mongoose.Types.ObjectId(conversation_id)
       );
-      console.log(conversations_document);
+      // console.log(conversations_document);
       permistionWanted = [setting.isFreeKickMem];
       if (
         checkPermissionGroup(
@@ -121,7 +118,7 @@ const groupChatController = {
           user_control_id,
           permistionWanted
         ) ||
-        user_control_id.toString() === user_id.toString()
+        user_control_id === user_id
       ) {
         if (conversations_document.is_group) {
           await Conversation.updateOne(
