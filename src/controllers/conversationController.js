@@ -297,6 +297,19 @@ const conversationController = {
       return res.json({ msg: "gán quyền thất bại", success: false });
     }
   }),
+  getRequestList: asyncHandler(async (req, res) => {
+    const { conversation_id } = req.body;
+
+    try {
+      const requestList = await Conversation.findById(conversation_id).populate(
+        { path: "requests" }
+      );
+      return res.json(requestList.requests);
+    } catch (err) {
+      console.log(err);
+      return res.json({ msg: "lấy get request thất bại", success: false });
+    }
+  }),
 };
 
 module.exports = conversationController;

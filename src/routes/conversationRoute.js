@@ -1,5 +1,5 @@
-const express = require('express');
-const conversationController = require('./../controllers/conversationController');
+const express = require("express");
+const conversationController = require("./../controllers/conversationController");
 
 const conversationRoute = express.Router();
 
@@ -10,7 +10,7 @@ const conversationRoute = express.Router();
  *     Conservation:
  *       type: object
  *       properties:
- *         _id: 
+ *         _id:
  *           type: object
  *           description: The auto-generated id
  *         members:
@@ -18,7 +18,7 @@ const conversationRoute = express.Router();
  *           items:
  *             type: object
  *             properties:
- *               user_id: 
+ *               user_id:
  *                 type: string
  *               nick_name:
  *                 type: string
@@ -38,7 +38,6 @@ const conversationRoute = express.Router();
  *         last_message: ObjectId('634255ff21fbe65189smw307')
  *         seen_last_message: false
  */
-
 
 /**
  *  @swagger
@@ -82,7 +81,7 @@ const conversationRoute = express.Router();
  *                   },
  *                 ]
  */
-conversationRoute.post('', conversationController.getAllByUser);
+conversationRoute.post("", conversationController.getAllByUser);
 /**
  *  @swagger
  *  /conversaion/create:
@@ -113,9 +112,9 @@ conversationRoute.post('', conversationController.getAllByUser);
  *                is_room: true
  *                last_message: ObjectId('634255ff21fbe65189smw307')
  *                seen_last_message: false
- *                 
+ *
  */
-conversationRoute.post('/create', conversationController.create);
+conversationRoute.post("/create", conversationController.create);
 
 /**
  *  @swagger
@@ -181,10 +180,10 @@ conversationRoute.post('/create', conversationController.create);
  *                "createdAt": "2022-10-28T14:09:23.023Z",
  *                "updatedAt": "2022-10-28T14:09:23.023Z",
  *              }
- *                 
+ *
  */
 
-conversationRoute.post('/create-group', conversationController.createGroup);
+conversationRoute.post("/create-group", conversationController.createGroup);
 
 /**
  *  @swagger
@@ -206,7 +205,7 @@ conversationRoute.post('/create-group', conversationController.createGroup);
  *          description: OK
  *          content:
  *            schema:
- *              example: 
+ *              example:
  *                "conversations": [
  *                  {
  *                    "_id": "635cd24af94a4a2396c4ecb9",
@@ -228,12 +227,10 @@ conversationRoute.post('/create-group', conversationController.createGroup);
  *                    }
  *                  },
  *                ]
- *                 
+ *
  */
 
-
-
-conversationRoute.post('/group', conversationController.getConversationIsGroup);
+conversationRoute.post("/group", conversationController.getConversationIsGroup);
 
 /**
  *  @swagger
@@ -259,15 +256,20 @@ conversationRoute.post('/group', conversationController.getConversationIsGroup);
  *          description: OK
  *          content:
  *            schema:
- *              example: { 
- *                msg: "gán quyền thành công", 
- *                success: true 
+ *              example: {
+ *                msg: "gán quyền thành công",
+ *                success: true
  *              }
- *                 
+ *
  */
 
-conversationRoute.post('/give-admin', conversationController.giveAdmin);
+conversationRoute.post("/give-admin", conversationController.giveAdmin);
 
-conversationRoute.post('/id', conversationController.findById);
+conversationRoute.post("/id", conversationController.findById);
+
+conversationRoute.post(
+  "/get-request-list",
+  conversationController.getRequestList
+);
 
 module.exports = conversationRoute;

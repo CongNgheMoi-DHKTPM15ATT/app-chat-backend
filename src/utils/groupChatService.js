@@ -1,7 +1,13 @@
 exports.generateRoomName = (members) => {
-  let groupName = members[0].nick_name.split(' ').slice(-1).join(' ');
-  for (var i = 1; i < 2; i++) {
-    groupName = groupName + ', ' + members[i].nick_name.split(' ').slice(-1).join(' ')
+  let groupName = members[0].nick_name.split(" ").slice(-1).join(" ");
+  if (members.length == 1) {
+    return groupName;
   }
-  return groupName + ',...';
-}
+  const maxCount = 2;
+  const length = members.length > maxCount ? maxCount : members.length;
+  for (var i = 1; i < length; i++) {
+    groupName =
+      groupName + ", " + members[i].nick_name.split(" ").slice(-1).join(" ");
+  }
+  return groupName + ",...";
+};
