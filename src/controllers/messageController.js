@@ -15,45 +15,74 @@ const messageController = {
     });
     console.log(messages_document);
     return res.json(messages_document);
+
+  }),
+  getAllByContentTypeTop4: asyncHandler(async (req, res) => {
+    const { conversation_id, content_type } = req.body;
+    const messages_document = await Message.find({
+      conversation: conversation_id,
+      content_type: content_type,
+    })
+      .limit(4)
+      .sort({ createdAt: -1 });
+    console.log(messages_document);
+    return res.json(messages_document);
   }),
   deleteByConversation: asyncHandler(async (req, res) => {}),
   getMessageByConversation: asyncHandler(async (req, res, next) => {
-    const { conversation_id, limit } = req.body;
-    const messages_document = await Message.find({
-      conversation: conversation_id,
-    })
-      .populate({
-        path: "conversation",
+    const { conversation_id, limit, offset } = req.body;
+    try {
+      const messages_document = await Message.find({
+        conversation: conversation_id,
       })
-      .populate("sender")
-      .sort({ createdAt: -1 })
-      .limit(limit);
+        .populate({
+          path: "conversation",
+        })
+        .populate("sender")
+        .sort({ createdAt: -1 })
+        .skip(offset)
+        .limit(limit);
 
-    const messages = [];
-    let sender;
-
-    messages_document.forEach((message) => {
-      message.conversation.members.forEach((member) => {
-        if (member.user_id.toString() === message.sender._id.toString()) {
-          sender = {
-            user_id: member.user_id,
-            nick_name: member.nick_name,
-            avatar:
-              message.sender.avatar ||
-              generateAvatar(message.sender.user_name, "white", "#009578"),
-          };
-          return;
+      const messages = [];
+      let sender;
+      console.log(messages_document);
+      messages_document.forEach((message) => {
+        message.conversation.members.forEach((member) => {
+          if (member.user_id.toString() === message.sender._id.toString()) {
+            sender = {
+              user_id: member.user_id,
+              nick_name: member.nick_name,
+              joinedDate: member.joinedDate || message.conversation.createdAt,
+              avatar:
+                message.sender.avatar ||
+                generateAvatar(message.sender.user_name, "white", "#009578"),
+            };
+            return;
+          }
+        });
+        try {
+          if (
+            sender.joinedDate <= message.createdAt ||
+            messages_document[messages_document.length - 1].content_type ==
+              "notification"
+          ) {
+            messages.push({
+              ...new MessageResponse(message).custom(),
+              sender: sender,
+            });
+          }
+        } catch (err) {
+          console.log(err);
         }
       });
-      messages.push({
-        ...new MessageResponse(message).custom(),
-        sender: sender,
+
+      return res.json({
+        messages,
       });
-    });
-    // messages.reverse();
-    return res.json({
-      messages,
-    });
+    } catch (err) {
+      console.log(err);
+    }
+
   }),
   // getLastMessage: asyncHandler(async (req, res, next) => {
   //   const { senderId, receiverId } = req.query;

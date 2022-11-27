@@ -145,11 +145,10 @@ messageRoute.post("/send", messageController.save);
  *                  "updatedAt": "2022-10-24T04:56:48.972Z",
  *                }
  *              }
- * 
+ *
  */
 
 messageRoute.post("/recover", messageController.recovery);
-
 
 /**
  *  @swagger
@@ -200,29 +199,79 @@ messageRoute.post("/recover", messageController.recovery);
  *                   "__v": 0
  *                 },
  *               ]
- * 
+ *
  */
 messageRoute.post("/content-type", messageController.getAllByContentType);
 
-
-
+/**
+ *  @swagger
+ *  /messages/content-type-top-4:
+ *    post:
+ *      summary: Lấy message theo loại message
+ *      tags: [Message]
+ *      consumes:
+ *        - application/json
+ *      parameters:
+ *        - in: body
+ *          description: truyền vào conversation_id và content_type (image || file || link || system)
+ *          schema:
+ *            type: object
+ *            properties:
+ *              conversation_id:
+ *                type: string
+ *                description: id của conversation
+ *              content_type:
+ *                type: string
+ *                description: content type của message
+ *      responses:
+ *        200:
+ *          description: OK
+ *          content:
+ *            schema:
+ *              example: [
+ *                 {
+ *                   "_id": "6354d074ce999f889cff5ea3",
+ *                   "sender": "63501bac6f230931f6ada8ea",
+ *                   "content": "https://thu-viddeo-public.s3.amazonaws.com/1666502768958-rn_image_picker_lib_temp_d04adcec-dbea-4456-9656-2106d1eb20ae.jpg",
+ *                   "content_type": "image",
+ *                   "deleted": false,
+ *                   "conversation": "63501cf06f230931f6ada94d",
+ *                   "createdAt": "2022-10-23T05:26:12.537Z",
+ *                   "updatedAt": "2022-10-23T05:26:12.537Z",
+ *                   "__v": 0
+ *                 },
+ *                 {
+ *                   "_id": "6354de01884a1d15b8a63919",
+ *                   "sender": "63501bac6f230931f6ada8ea",
+ *                   "content": "afk",
+ *                   "content_type": "image",
+ *                   "deleted": false,
+ *                   "conversation": "63501cf06f230931f6ada94d",
+ *                   "createdAt": "2022-10-23T06:24:01.037Z",
+ *                   "updatedAt": "2022-10-23T06:24:01.037Z",
+ *                   "__v": 0
+ *                 },
+ *               ]
+ *
+ */
+messageRoute.post(
+  "/content-type-top-4",
+  messageController.getAllByContentTypeTop4
+);
 
 // route outline
-// 
+//
 messageRoute.post("/delete-anything", async (req, res) => {
-
   //delete by convasation
 
   // const { conversation_id } = req.body;
   // console.log(conversation_id)
   // await Message.deleteMany({ conversation: conversation_id })
   // return res.json({ "msg": 'delete complie' })
-  // 
-  // delete by have sender 
-  const mess = await Message.remove({ "sender": { "$exists": false } })
-  return res.json({ mess })
+  //
+  // delete by have sender
+  const mess = await Message.remove({ sender: { $exists: false } });
+  return res.json({ mess });
 });
-
-
 
 module.exports = messageRoute;

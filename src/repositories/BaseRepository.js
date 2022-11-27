@@ -8,13 +8,13 @@ module.exports = class BaseRepository {
   async getAll(req, res) {
     console.log("strat get all")
     const docs = await model(this.model).find({});
-    return res.json({ docs });
+    return res.json(doc);
   }
 
   async findById(req, res) {
     const { _id } = req.body;
     const doc = await model(this.model).findById(_id)
-    return res.json({ doc });
+    return res.json(doc);
   }
 
   async update(req, res) {

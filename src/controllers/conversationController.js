@@ -6,20 +6,28 @@ const User = require("./../models/User.js");
 const GroupChat = require("./../models/GroupChat.js");
 const { generateAvatar } = require("./../utils/generateAvatar");
 const { generateRoomName } = require("./../utils/groupChatService");
-const { statusSenderRelativeWithReceiver, checkIsBlockOrBlocked } = require("./../utils/friendService")
-const BaseRepository = require('./../repositories/BaseRepository');
+const {
+  statusSenderRelativeWithReceiver,
+  checkIsBlockOrBlocked,
+} = require("./../utils/friendService");
+const BaseRepository = require("./../repositories/BaseRepository");
 
 const mongoose = require("mongoose");
-const model = "Conversation"
+const model = "Conversation";
 
-const baseRepository = new BaseRepository(model)
+const baseRepository = new BaseRepository(model);
 
 const groupRepository = {
-  getAll: asyncHandler(async (req, res) => { await baseRepository.getAll(req, res) }),
-  findById: asyncHandler(async (req, res) => { await baseRepository.findById(req, res) }),
-  update: asyncHandler(async (req, res) => { await baseRepository.update(req, res) }),
-}
-
+  getAll: asyncHandler(async (req, res) => {
+    await baseRepository.getAll(req, res);
+  }),
+  findById: asyncHandler(async (req, res) => {
+    await baseRepository.findById(req, res);
+  }),
+  update: asyncHandler(async (req, res) => {
+    await baseRepository.update(req, res);
+  }),
+};
 
 async function getUsers(user_ids) {
   const users = [];
@@ -80,19 +88,21 @@ const conversationController = {
 
       const conversations = [];
       let receiver;
+
       conversations_document_populate.forEach(async (conversation) => {
         if (!conversation.is_group) {
           if (conversation.members.length === 1) {
-
             //user to user
             if (!(conversation.last_message === undefined)) {
               conversations.push({
                 ...new ConversationResponse(conversation).custom(),
                 receiver: {
                   _id: conversation.members[0].user_id._id,
-                  nick_name: conversation.members[0].nick_name ||
+                  nick_name:
+                    conversation.members[0].nick_name ||
                     conversation.members[0].user_id.user_name,
-                  avatar: conversation.members[0].user_id.avatar ||
+                  avatar:
+                    conversation.members[0].user_id.avatar ||
                     generateAvatar(
                       conversation.members[0].user_id.user_name,
                       "white",
@@ -109,21 +119,24 @@ const conversationController = {
           }
         } else {
           //group chat
-
-          const members = [];
-          for (var i = 0; i < conversation.members.length; i++) {
-            members.push({
-              _id: conversation.members[i].user_id._id,
-              nick_name: conversation.members[i].nick_name ||
-                conversation.members[i].user_id.user_name,
-              avatar: conversation.members[i].user_id.avatar ||
-                generateAvatar(
-                  conversation.members[i].user_id.user_name,
-                  "white",
-                  "#009578"
-                ),
-            });
+          if (conversation.sender[0].is_removed) {
+            return;
           }
+          const members = [];
+          conversation.members.forEach((member) => {
+            // console.log(member.user_id._id);
+            try {
+              members.push({
+                _id: member.user_id._id,
+                nick_name: member.nick_name || member.user_id.user_name,
+                avatar:
+                  member.user_id.avatar ||
+                  generateAvatar(member.user_id.user_name, "white", "#009578"),
+              });
+            } catch (e) {
+              console.log(conversation._id);
+            }
+          });
 
           if (!conversation.hasOwnProperty("last_message")) {
             const message = await new Message({
@@ -135,26 +148,30 @@ const conversationController = {
 
             conversation.last_message = message._id;
             const conversations_document = await Conversation.findByIdAndUpdate(
-              conversation._id, { $set: { last_message: message._id } }
+              conversation._id,
+              { $set: { last_message: message._id } }
             );
             conversation.last_message = message;
           }
 
           const nameGroupChat = generateRoomName(members);
-
-          conversations.push({
-            ...new ConversationResponse(conversation).custom(),
-            receiver: {
-              _id: conversation.receiver._id,
-              nick_name: conversation.receiver.nick_name || nameGroupChat,
-              avatar: conversation.receiver.avatar,
-              members,
-            },
-            nick_name: conversation.sender[0].nick_name
-          });
+          try {
+            conversations.push({
+              ...new ConversationResponse(conversation).custom(),
+              receiver: {
+                _id: conversation.receiver._id,
+                nick_name: conversation.receiver.nick_name || nameGroupChat,
+                avatar: conversation.receiver.avatar,
+                members,
+              },
+              nick_name: conversation.sender[0].nick_name,
+            });
+          } catch (e) {
+            console.log(conversation._id);
+          }
         }
       });
-      console.log(conversations)
+
       return res.status(200).json({ conversations });
     } catch (err) {
       console.log(err);
@@ -171,8 +188,6 @@ const conversationController = {
       members.push({ user_id: user._id, nick_name: user.user_name });
     });
 
-    console.log(members);
-
     conversation = await new Conversation({
       members: members,
       is_group: false,
@@ -181,30 +196,38 @@ const conversationController = {
     res.status(200).json(conversation);
   }),
   getConversationIsGroup: asyncHandler(async (req, res) => {
-    const { user_id } = req.body;
+    try {
+      const { user_id } = req.body;
+      const conversations = [];
 
+      const conversations_document = await Conversation.find({
+        "members.user_id": mongoose.Types.ObjectId(user_id),
+        is_group: true,
+      })
+        .populate({ path: "receiver" })
+        .populate({ path: "last_message" });
 
-    const conversations = [];
+      for (var i = 0; i < conversations_document.length; i++) {
+        try {
+          conversations.push({
+            ...new ConversationResponse(conversations_document[i]).custom(),
+            receiver: {
+              _id: conversations_document[i].receiver._id,
+              nick_name:
+                conversations_document[i].receiver.nick_name || nameGroupChat,
+              avatar: conversations_document[i].receiver.avatar,
+            },
+          });
+        } catch (err) {
+          // console.log("setting " + conversations_document.setting);
+          // console.log(conversations_document._id);
+        }
+      }
 
-    const conversations_document = await Conversation.find({ "members.user_id": mongoose.Types.ObjectId(user_id), is_group: true })
-      .populate({ path: "receiver" })
-      .populate({ path: "last_message" });
-
-    console.log(conversations_document)
-
-    for (var i = 0; i < conversations_document.length; i++) {
-      conversations.push({
-        ...new ConversationResponse(conversations_document[i]).custom(),
-        receiver: {
-          _id: conversations_document[i].receiver._id,
-          nick_name: conversations_document[i].receiver.nick_name || nameGroupChat,
-          avatar: conversations_document[i].receiver.avatar,
-        },
-      });
+      return res.json({ conversations });
+    } catch (err) {
+      console.log(err);
     }
-
-    return res.json({ conversations })
-
   }),
   createGroup: asyncHandler(async (req, res) => {
     const { admin_id, user_id, group_name } = req.body;
@@ -216,7 +239,7 @@ const conversationController = {
     users.forEach((user) => {
       if (
         members.length === 0 ||
-        members.filter(function(e) {
+        members.filter(function (e) {
           return e.user_id == user_id;
         }).length == 0
       ) {
@@ -224,14 +247,14 @@ const conversationController = {
       }
     });
     let groupChat = null;
-    if (members.length > 2) {
+    if (members.length > 0) {
       const nameGroupChat = generateRoomName(members);
       groupChat = await GroupChat.create({
         nick_name: group_name || nameGroupChat,
         avatar: generateAvatar("Group", "white", "#FFCC66"),
       });
     } else {
-      res.status(400).json({ msg: "group must have 3 members" });
+      res.status(400).json({ msg: "group must have 1 members" });
     }
 
     const message = await new Message({
@@ -242,10 +265,15 @@ const conversationController = {
 
     const conversation = await new Conversation({
       members: members,
-      is_group: members.length === 2 ? false : true,
+      is_group: true,
       receiver: groupChat || undefined,
       last_message: message._id,
-      admin: admin_id
+      admin: admin_id,
+      setting: {
+        isFreeEnter: false,
+        isFreeKickMem: false,
+        isFreeEdit: false,
+      },
     }).save();
 
     message.conversation = conversation._id;
@@ -255,18 +283,34 @@ const conversationController = {
   }),
   giveAdmin: asyncHandler(async (req, res) => {
     const { conversation_id, user_id, admin_id } = req.body;
-    console.log(admin_id)
+    console.log(admin_id);
 
     const conversations_document = await Conversation.findById(conversation_id);
     try {
       if (conversations_document.admin.toString() === admin_id.toString()) {
-        console.log("admin")
-        const conversation = await Conversation.update({ _id: conversation_id }, { $set: { 'admin': mongoose.Types.ObjectId(user_id) } })
-        return res.json({ msg: "gán quyền thành công", success: true })
+        console.log("admin");
+        const conversation = await Conversation.update(
+          { _id: conversation_id },
+          { $set: { admin: mongoose.Types.ObjectId(user_id) } }
+        );
+        return res.json({ msg: "gán quyền thành công", success: true });
       }
     } catch (err) {
-      console.log(err)
-      return res.json({ msg: "gán quyền thất bại", success: false })
+      console.log(err);
+      return res.json({ msg: "gán quyền thất bại", success: false });
+    }
+  }),
+  getRequestList: asyncHandler(async (req, res) => {
+    const { conversation_id } = req.body;
+
+    try {
+      const requestList = await Conversation.findById(conversation_id).populate(
+        { path: "requests" }
+      );
+      return res.json(requestList.requests);
+    } catch (err) {
+      console.log(err);
+      return res.json({ msg: "lấy get request thất bại", success: false });
     }
   }),
 };
