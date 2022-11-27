@@ -15,6 +15,7 @@ const messageController = {
     });
     console.log(messages_document);
     return res.json(messages_document);
+
   }),
   getAllByContentTypeTop4: asyncHandler(async (req, res) => {
     const { conversation_id, content_type } = req.body;
@@ -81,6 +82,7 @@ const messageController = {
     } catch (err) {
       console.log(err);
     }
+
   }),
   // getLastMessage: asyncHandler(async (req, res, next) => {
   //   const { senderId, receiverId } = req.query;
@@ -128,7 +130,7 @@ const messageController = {
       {
         deleted: true,
         content: "Tin nhắn đã được thu hồi",
-        content_type: "text",
+        content_type: "recover",
       },
       { returnOriginal: false }
     );
