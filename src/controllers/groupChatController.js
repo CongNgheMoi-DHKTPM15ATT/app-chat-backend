@@ -56,7 +56,6 @@ const groupChatController = {
   ...conversationRepository,
   addMems: asyncHandler(async (req, res) => {
     const { conversation_id, user_control_id, user_id } = req.body;
-    console.log(user_id);
     try {
       let mems;
       if (Array.isArray(user_id)) {
@@ -108,12 +107,10 @@ const groupChatController = {
   }),
   removeMems: asyncHandler(async (req, res) => {
     const { conversation_id, user_control_id, user_id } = req.body;
-    console.log(conversation_id);
     try {
       const conversations_document = await Conversation.findById(
         mongoose.Types.ObjectId(conversation_id)
       );
-      console.log(conversations_document);
       permistionWanted = [setting.isFreeKickMem];
       if (
         checkPermissionGroup(

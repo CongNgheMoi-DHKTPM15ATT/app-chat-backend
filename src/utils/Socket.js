@@ -44,6 +44,11 @@ io.on("connection", (socket) => {
     console.log(_userOnlines);
   });
 
+  socket.on("load_list_search", (sender_id) => {
+    socket.emit("load_list_search");
+    socket.to(_userOnlines.get(sender_id)).emit("load_list_search");
+  });
+
   socket.on("loadConver", (sender_id) => {
     socket.emit("load-conver");
     socket.to(_userOnlines.get(sender_id)).emit("load-conver");
