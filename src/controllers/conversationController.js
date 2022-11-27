@@ -119,6 +119,9 @@ const conversationController = {
           }
         } else {
           //group chat
+          if (conversation.sender[0].is_removed) {
+            return;
+          }
           const members = [];
           conversation.members.forEach((member) => {
             // console.log(member.user_id._id);

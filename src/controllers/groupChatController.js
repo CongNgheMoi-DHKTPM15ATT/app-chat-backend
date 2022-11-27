@@ -124,9 +124,16 @@ const groupChatController = {
         user_control_id.toString() === user_id.toString()
       ) {
         if (conversations_document.is_group) {
-          await Conversation.updateOne(
-            { _id: mongoose.Types.ObjectId(conversation_id) },
-            { $pull: { members: { user_id: user_id } } }
+          await Conversation.update(
+            {
+              _id: mongoose.Types.ObjectId(conversation_id),
+              "members.user_id": user_id,
+            },
+            {
+              $set: {
+                "members.$.is_removed": true,
+              },
+            }
           );
           return res.json({ msg: "remove complie" });
         } else {
